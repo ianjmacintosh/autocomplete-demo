@@ -1,0 +1,7 @@
+.timing-readout {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  opacity: 0.8;
+  min-height: 1.2em;
+}

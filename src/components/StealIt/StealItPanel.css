@@ -1,0 +1,40 @@
+.steal-it-panel {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color, #ddd);
+}
+
+.steal-it-prompt {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 0.5rem;
+  background: var(--input-bg, #fafafa);
+  color: inherit;
+  resize: vertical;
+}
+
+.steal-it-copy-button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--border-color, #ccc);
+  background: var(--accent-color, #2563eb);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .steal-it-panel {
+    border-color: #444;
+  }
+
+  .steal-it-prompt {
+    border-color: #444;
+    background: #1e1e1e;
+  }
+}

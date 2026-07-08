@@ -1,33 +1,54 @@
 import { useState } from "react";
-import reactLogo from "../assets/react.svg";
-import viteLogo from "/vite.svg";
+import { Autocomplete } from "./Autocomplete/Autocomplete";
+import { SettingsPanel } from "./Settings/SettingsPanel";
+import { TimingReadout } from "./TimingReadout/TimingReadout";
+import { StealItPanel } from "./StealIt/StealItPanel";
+import { useUrlSyncedSettings } from "../hooks/useUrlSyncedSettings";
+import { useSuggestions } from "../hooks/useSuggestions";
+import { getSizeTier } from "../data";
 import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [settings, updateSettings] = useUrlSyncedSettings();
+  const [query, setQuery] = useState("");
+  const { suggestions, meta, corpusSize } = useSuggestions(query, settings);
+  const tier = getSizeTier(settings.tierId);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+      <header className="app-header">
+        <h1>Autocomplete, tuned to your use case</h1>
         <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
+          A configurable port of the drug-name lookup from{" "}
+          <a
+            href="https://github.com/ianjmacintosh/pillbug"
+            target="_blank"
+            rel="noreferrer"
+          >
+            ianjmacintosh/pillbug
+          </a>
+          's "Add Prescription" flow. Change the settings below and try typing.
         </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      </header>
+
+      <Autocomplete
+        value={query}
+        onChange={setQuery}
+        suggestions={suggestions}
+        minChars={settings.minChars}
+      />
+      <TimingReadout meta={meta} corpusSize={corpusSize} />
+      {tier.attribution && (
+        <p className="attribution-note">
+          <a href={tier.attribution.href} target="_blank" rel="noreferrer">
+            {tier.attribution.text}
+          </a>
+        </p>
+      )}
+
+      <SettingsPanel settings={settings} onChange={updateSettings} />
+
+      <StealItPanel settings={settings} />
     </>
   );
 }

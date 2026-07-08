@@ -5,3 +5,6 @@ coverage
 # Ignore plugins
 .agents/
 .claude/
+
+# Generated corpus data — not hand-authored, pretty-printing just bloats file size
+src/data/*.json

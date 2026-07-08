@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { debounce } from "lodash-es";
 
 // Ported from ianjmacintosh/pillbug's useDebouncedValue hook.
+// Ported at pillbug@6b19cd8 (#291). Diff pillbug's file against that SHA to
+// spot upstream changes worth porting — no automated sync, manual/occasional.
 export interface UseDebouncedValueResult<T> {
   /** The most recently *settled* value. Lags `value` by up to `delayMs`. */
   value: T;

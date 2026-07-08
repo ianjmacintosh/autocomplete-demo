@@ -1,5 +1,8 @@
 // Ported from ianjmacintosh/pillbug's PrescriptionForm.helpers.ts, generalized
 // from drug names to any string corpus and parameterized instead of hardcoded.
+// Ported at pillbug@6b19cd8 (#291, "Add medication name autocomplete to
+// prescription form"). Diff pillbug's file against that SHA to spot upstream
+// changes worth porting — no automated sync, this is a manual, occasional check.
 
 /** Case-insensitive prefix match, capped at `maxResults` — near-free to check. */
 export function getPrefixMatches(

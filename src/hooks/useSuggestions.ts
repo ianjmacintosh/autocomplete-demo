@@ -18,6 +18,10 @@ export interface UseSuggestionsResult {
 // computation (including the "instant" prefix scan) runs inside an effect
 // rather than during render, since timing it requires `performance.now()`,
 // which this repo's stricter lint rules forbid calling during render.
+//
+// Ported at pillbug@6b19cd8 (#291). Diff pillbug's useDrugNameSuggestions
+// against that SHA to spot upstream changes worth porting — no automated
+// sync, manual/occasional.
 export function useSuggestions(
   query: string,
   settings: AutocompleteSettings,

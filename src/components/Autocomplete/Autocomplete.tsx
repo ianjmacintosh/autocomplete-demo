@@ -18,6 +18,9 @@ interface AutocompleteProps {
 // Generalized from ianjmacintosh/pillbug's DrugNameCombobox.tsx. Purely
 // presentational — matching/debounce/worker orchestration lives in
 // useSuggestions, called once by the parent so the search isn't duplicated.
+//
+// Ported at pillbug@6b19cd8 (#291). Diff pillbug's file against that SHA to
+// spot upstream changes worth porting — no automated sync, manual/occasional.
 export function Autocomplete({
   value,
   onChange,

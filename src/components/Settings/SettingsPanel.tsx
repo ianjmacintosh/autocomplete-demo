@@ -70,7 +70,7 @@ export function SettingsPanel({ settings, onChange }: SettingsPanelProps) {
         <label className="settings-checkbox">
           <input
             type="checkbox"
-            checked={settings.workerModeOn}
+            checked={workerModeApplies && settings.workerModeOn}
             onChange={(e) => onChange({ workerModeOn: e.target.checked })}
           />
           Run fuzzy matching in a Web Worker

@@ -39,7 +39,7 @@ export function SettingsPanel({ settings, onChange }: SettingsPanelProps) {
                 checked={settings.tierId === tier.id}
                 onChange={() => onChange({ tierId: tier.id as SizeTierId })}
               />
-              {tier.label} — {tier.theme}
+              {tier.theme} ({tier.approxSize.toLocaleString()} entries)
             </label>
           ))}
         </div>

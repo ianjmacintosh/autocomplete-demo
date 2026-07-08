@@ -17,7 +17,7 @@ export function TimingReadout({ meta, corpusSize }: TimingReadoutProps) {
           {corpusSize.toLocaleString()} entries
         </>
       ) : (
-        <>Type to search a corpus of {corpusSize.toLocaleString()} entries…</>
+        <>Type to search…</>
       )}
     </p>
   );

@@ -2,7 +2,6 @@ import type { SizeTierId } from "../lib/types";
 
 export interface SizeTier {
   id: SizeTierId;
-  label: string;
   approxSize: number;
   theme: string;
   attribution?: { text: string; href: string };
@@ -12,21 +11,18 @@ export interface SizeTier {
 export const SIZE_TIERS: readonly SizeTier[] = [
   {
     id: "elements",
-    label: "100",
     approxSize: 118,
     theme: "Periodic table elements",
     load: () => import("./elements.json").then((m) => m.default as string[]),
   },
   {
     id: "cheeses",
-    label: "1,000",
     approxSize: 599,
     theme: "Cheese types",
     load: () => import("./cheeses.json").then((m) => m.default as string[]),
   },
   {
     id: "cities",
-    label: "10,000",
     approxSize: 10000,
     theme: "World cities",
     attribution: {
@@ -38,7 +34,6 @@ export const SIZE_TIERS: readonly SizeTier[] = [
   },
   {
     id: "books",
-    label: "100,000",
     approxSize: 100000,
     theme: "Book titles",
     load: () => import("./book-titles.json").then((m) => m.default as string[]),

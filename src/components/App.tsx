@@ -28,7 +28,7 @@ function App() {
   }, []);
 
   return (
-    <div className="app-layout">
+    <>
       <div className="app-main">
         <header className="app-header">
           <h1>Autocomplete, tuned to your use case</h1>
@@ -86,7 +86,7 @@ function App() {
       </div>
 
       <EventLog events={events} />
-    </div>
+    </>
   );
 }
 

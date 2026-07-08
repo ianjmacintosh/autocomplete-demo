@@ -1,0 +1,82 @@
+/* Deliberately always Monokai-dark, independent of the page's own
+   light/dark theme — this is a fixed console-style aesthetic, not a
+   themed component. */
+.event-log {
+  position: sticky;
+  top: 1.5rem;
+  flex: 0 0 260px;
+  width: 260px;
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+  background: #272822;
+  color: #f8f8f2;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  font-family:
+    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.75rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.event-log-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #75715e;
+}
+
+.event-log-empty {
+  margin: 0;
+  color: #75715e;
+  font-style: italic;
+}
+
+.event-log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.2rem;
+}
+
+.event-log-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.event-log-timestamp {
+  flex-shrink: 0;
+  color: #75715e;
+}
+
+.event-log-type {
+  font-weight: 600;
+}
+
+.event-log-entry--focus .event-log-type {
+  color: #a6e22e;
+}
+
+.event-log-entry--blur .event-log-type {
+  color: #fd971f;
+}
+
+.event-log-entry--keydown .event-log-type {
+  color: #66d9ef;
+}
+
+.event-log-entry--keyup .event-log-type {
+  color: #ae81ff;
+}
+
+.event-log-key {
+  margin-left: auto;
+  color: #e6db74;
+}

@@ -1,8 +1,20 @@
 #root {
-  max-width: 720px;
+  max-width: 1040px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
   text-align: left;
+}
+
+.app-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.app-main {
+  flex: 1 1 480px;
+  max-width: 720px;
 }
 
 .app-header {

@@ -4,7 +4,6 @@ export interface SizeTier {
   id: SizeTierId;
   approxSize: number;
   theme: string;
-  attribution?: { text: string; href: string };
   load: () => Promise<string[]>;
 }
 
@@ -25,10 +24,6 @@ export const SIZE_TIERS: readonly SizeTier[] = [
     id: "cities",
     approxSize: 10000,
     theme: "World cities",
-    attribution: {
-      text: "City data from GeoNames (CC BY 4.0)",
-      href: "https://www.geonames.org/",
-    },
     load: () =>
       import("./world-cities.json").then((m) => m.default as string[]),
   },

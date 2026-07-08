@@ -5,14 +5,12 @@ import { TimingReadout } from "./TimingReadout/TimingReadout";
 import { StealItPanel } from "./StealIt/StealItPanel";
 import { useUrlSyncedSettings } from "../hooks/useUrlSyncedSettings";
 import { useSuggestions } from "../hooks/useSuggestions";
-import { getSizeTier } from "../data";
 import "./App.css";
 
 function App() {
   const [settings, updateSettings] = useUrlSyncedSettings();
   const [query, setQuery] = useState("");
   const { suggestions, meta, corpusSize } = useSuggestions(query, settings);
-  const tier = getSizeTier(settings.tierId);
 
   return (
     <>
@@ -38,17 +36,28 @@ function App() {
         minChars={settings.minChars}
       />
       <TimingReadout meta={meta} corpusSize={corpusSize} />
-      {tier.attribution && (
-        <p className="attribution-note">
-          <a href={tier.attribution.href} target="_blank" rel="noreferrer">
-            {tier.attribution.text}
-          </a>
-        </p>
-      )}
 
       <SettingsPanel settings={settings} onChange={updateSettings} />
 
       <StealItPanel settings={settings} />
+
+      <footer className="app-footer">
+        <p>
+          <a href="https://www.geonames.org/" target="_blank" rel="noreferrer">
+            City data from GeoNames (CC BY 4.0)
+          </a>
+        </p>
+        <p>
+          © 2026{" "}
+          <a
+            href="https://www.ianjmacintosh.com/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Ian J. MacIntosh
+          </a>
+        </p>
+      </footer>
     </>
   );
 }

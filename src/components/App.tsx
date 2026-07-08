@@ -16,14 +16,17 @@ function App() {
   const [query, setQuery] = useState("");
   const { suggestions, meta, corpusSize } = useSuggestions(query, settings);
 
+  // Newest-first: paired with .event-log-list's flex-direction: column-reverse,
+  // this keeps new entries anchored at the bottom of the panel without any
+  // manual scroll management — scrolling up to review history just works.
   const [events, setEvents] = useState<LoggedEvent[]>([]);
   const nextEventId = useRef(0);
   const logEvent = useCallback((type: DomEventType, key?: string) => {
     setEvents((prev) =>
       [
-        ...prev,
         { id: nextEventId.current++, type, key, timestamp: Date.now() },
-      ].slice(-MAX_LOGGED_EVENTS),
+        ...prev,
+      ].slice(0, MAX_LOGGED_EVENTS),
     );
   }, []);
 

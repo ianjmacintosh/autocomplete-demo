@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import "./EventLog.css";
 
 export type DomEventType = "focus" | "blur" | "keydown" | "keyup";
@@ -22,27 +21,8 @@ const EVENT_LABEL: Record<DomEventType, string> = {
 };
 
 export function EventLog({ events }: EventLogProps) {
-  const containerRef = useRef<HTMLElement>(null);
-
-  // Auto-scroll to the newest (bottom) entry, but only when the visitor
-  // hasn't scrolled up to review history — otherwise a new event would
-  // yank them back down mid-review.
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const distanceFromBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight;
-    if (distanceFromBottom < 48) {
-      container.scrollTop = container.scrollHeight;
-    }
-  }, [events]);
-
   return (
-    <aside
-      ref={containerRef}
-      className="event-log"
-      aria-label="Input DOM event log"
-    >
+    <aside className="event-log" aria-label="Input DOM event log">
       <h2 className="event-log-title">Event log</h2>
       {events.length === 0 ? (
         <p className="event-log-empty">

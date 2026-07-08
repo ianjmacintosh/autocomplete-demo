@@ -1,13 +1,17 @@
 #root {
   --event-log-width: 340px;
-  padding: 2rem 1.5rem 4rem;
-  padding-right: calc(var(--event-log-width) + 1.5rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--event-log-width);
+  align-items: start;
+  min-height: 100vh;
   text-align: left;
 }
 
 .app-main {
+  grid-column: 1;
   max-width: 720px;
   margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
 }
 
 .app-header {
@@ -39,5 +43,18 @@
 @media (prefers-color-scheme: dark) {
   .app-footer {
     border-top-color: #444;
+  }
+}
+
+/* Below this width the sidebar layout gets too cramped: stack the event
+   log above the main content instead of squeezing it into a side column. */
+@media (max-width: 700px) {
+  #root {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .app-main {
+    grid-row: 2;
   }
 }

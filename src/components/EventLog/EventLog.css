@@ -2,11 +2,11 @@
    light/dark theme — this is a fixed console-style aesthetic, not a
    themed component. */
 .event-log {
-  position: fixed;
+  grid-column: 2;
+  position: sticky;
   top: 0;
-  right: 0;
-  bottom: 0;
-  width: var(--event-log-width);
+  height: 100vh;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   background: #272822;
@@ -88,4 +88,15 @@
 .event-log-key {
   margin-left: auto;
   color: #e6db74;
+}
+
+/* Stacked mobile layout (see App.css): dock to the top of the viewport
+   instead of the side. Height is fixed (not content-driven) so the panel
+   doesn't grow as events arrive and push the heading/input around. */
+@media (max-width: 700px) {
+  .event-log {
+    grid-column: 1;
+    grid-row: 1;
+    height: 35vh;
+  }
 }

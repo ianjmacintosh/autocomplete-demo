@@ -34,7 +34,7 @@ export function Autocomplete({
       <Combobox
         id="autocomplete-demo-input"
         className="autocomplete-input"
-        placeholder={`Type at least ${minChars} characters…`}
+        placeholder={`Type at least ${minChars} character${minChars === 1 ? "" : "s"}…`}
         autoSelect
       />
       {suggestions.length > 0 && (

@@ -1,28 +1,29 @@
+import type { LoggedEvent, LoggedEventType } from "../../lib/types";
 import "./EventLog.css";
 
-export type DomEventType = "focus" | "blur" | "keydown" | "keyup";
-
-export interface LoggedEvent {
-  id: number;
-  type: DomEventType;
-  key?: string;
-  timestamp: number;
-}
+export type { LoggedEvent, LoggedEventType };
 
 interface EventLogProps {
   events: LoggedEvent[];
 }
 
-const EVENT_LABEL: Record<DomEventType, string> = {
+const EVENT_LABEL: Record<LoggedEventType, string> = {
   focus: "focus",
   blur: "blur",
   keydown: "keyDown",
   keyup: "keyUp",
+  change: "change",
+  debounceStart: "debounceStart",
+  debounceEnd: "debounceEnd",
+  countStart: "countStart",
+  countEnd: "countEnd",
+  sortStart: "sortStart",
+  sortEnd: "sortEnd",
 };
 
 export function EventLog({ events }: EventLogProps) {
   return (
-    <aside className="event-log" aria-label="Input DOM event log">
+    <aside className="event-log" aria-label="Input and search event log">
       <h2 className="event-log-title">Event log</h2>
       {events.length === 0 ? (
         <p className="event-log-empty">
@@ -39,7 +40,9 @@ export function EventLog({ events }: EventLogProps) {
                 {formatTimestamp(event.timestamp)}
               </span>
               <span className="event-log-type">{EVENT_LABEL[event.type]}</span>
-              {event.key && <span className="event-log-key">{event.key}</span>}
+              {event.detail && (
+                <span className="event-log-key">{event.detail}</span>
+              )}
             </li>
           ))}
         </ol>

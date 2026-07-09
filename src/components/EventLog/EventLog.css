@@ -85,6 +85,36 @@
   color: #ae81ff;
 }
 
+.event-log-entry--change .event-log-type {
+  color: #e6db74;
+}
+
+/* Search internals: paired start/end phases share a hue, dim for the start
+   of a phase and bright once it's settled/finished. */
+.event-log-entry--debounceStart .event-log-type {
+  color: #c2418f;
+}
+
+.event-log-entry--debounceEnd .event-log-type {
+  color: #f92672;
+}
+
+.event-log-entry--countStart .event-log-type {
+  color: #3a94a6;
+}
+
+.event-log-entry--countEnd .event-log-type {
+  color: #38f9c0;
+}
+
+.event-log-entry--sortStart .event-log-type {
+  color: #7a5fa6;
+}
+
+.event-log-entry--sortEnd .event-log-type {
+  color: #d291ff;
+}
+
 .event-log-key {
   margin-left: auto;
   color: #e6db74;

@@ -12,8 +12,21 @@ export type WorkerRequest =
       distanceThreshold: number;
     };
 
+export type SearchProgressPhase =
+  | "countStart"
+  | "countEnd"
+  | "sortStart"
+  | "sortEnd";
+
 export type WorkerResponse =
   | { type: "corpusReady"; tierId: SizeTierId }
+  | {
+      type: "searchProgress";
+      requestId: number;
+      phase: SearchProgressPhase;
+      query?: string;
+      count?: number;
+    }
   | {
       type: "searchResult";
       requestId: number;
@@ -59,6 +72,34 @@ ctx.onmessage = (event) => {
     corpus,
     msg.maxResults,
     msg.distanceThreshold,
+    {
+      onCountStart: () =>
+        ctx.postMessage({
+          type: "searchProgress",
+          requestId: msg.requestId,
+          phase: "countStart",
+          query: msg.query,
+        }),
+      onCountEnd: (count) =>
+        ctx.postMessage({
+          type: "searchProgress",
+          requestId: msg.requestId,
+          phase: "countEnd",
+          count,
+        }),
+      onSortStart: () =>
+        ctx.postMessage({
+          type: "searchProgress",
+          requestId: msg.requestId,
+          phase: "sortStart",
+        }),
+      onSortEnd: () =>
+        ctx.postMessage({
+          type: "searchProgress",
+          requestId: msg.requestId,
+          phase: "sortEnd",
+        }),
+    },
   );
   const elapsedMs = performance.now() - start;
   ctx.postMessage({

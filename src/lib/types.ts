@@ -33,3 +33,30 @@ export interface SearchMeta {
   ranOn: "main" | "worker";
   strategyUsed: "prefix" | "fuzzy";
 }
+
+/**
+ * Every event the demo surfaces in the Event log: raw DOM events from the
+ * input, plus the internal search pipeline stages (debounce settling,
+ * counting candidate matches, sorting them) so the log can narrate what the
+ * search is doing, not just what the user did.
+ */
+export type LoggedEventType =
+  | "focus"
+  | "blur"
+  | "keydown"
+  | "keyup"
+  | "change"
+  | "debounceStart"
+  | "debounceEnd"
+  | "countStart"
+  | "countEnd"
+  | "sortStart"
+  | "sortEnd";
+
+export interface LoggedEvent {
+  id: number;
+  type: LoggedEventType;
+  /** Free-form context: a key name, the query value, or a match count. */
+  detail?: string;
+  timestamp: number;
+}

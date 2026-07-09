@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createNameSearchWorker } from "../workers/workerClient";
-import type { WorkerResponse } from "../workers/nameSearch.worker";
+import type {
+  SearchProgressPhase,
+  WorkerResponse,
+} from "../workers/nameSearch.worker";
 import type { SizeTierId } from "../lib/types";
 
 export interface NameSearchWorkerResult {
@@ -27,11 +30,28 @@ interface RawResult extends NameSearchWorkerResult {
 // keeping its corpus in sync with `tierId`, and correlating responses to the
 // request/tier that triggered them so a stale response (from before a tier
 // switch) can't be applied.
-export function useNameSearchWorker(tierId: SizeTierId): NameSearchWorker {
+export function useNameSearchWorker(
+  tierId: SizeTierId,
+  onProgress?: (
+    phase: SearchProgressPhase,
+    detail?: { query?: string; count?: number },
+  ) => void,
+): NameSearchWorker {
   const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef(0);
   const [readyTierId, setReadyTierId] = useState<SizeTierId | null>(null);
   const [rawResult, setRawResult] = useState<RawResult | null>(null);
+
+  // Read via a ref (rather than depending on it in the mount-only effect
+  // below) so a new onProgress identity each render doesn't force the
+  // worker to be recreated, and progress reported mid-computation always
+  // reaches the latest callback instead of a stale closure. Written from
+  // an effect, not during render — mutating a ref while rendering is
+  // forbidden by this repo's stricter lint rules.
+  const onProgressRef = useRef(onProgress);
+  useEffect(() => {
+    onProgressRef.current = onProgress;
+  }, [onProgress]);
 
   useEffect(() => {
     const worker = createNameSearchWorker();
@@ -40,6 +60,13 @@ export function useNameSearchWorker(tierId: SizeTierId): NameSearchWorker {
       const data = event.data;
       if (data.type === "corpusReady") {
         setReadyTierId(data.tierId);
+      } else if (data.type === "searchProgress") {
+        if (data.requestId === requestIdRef.current) {
+          onProgressRef.current?.(data.phase, {
+            query: data.query,
+            count: data.count,
+          });
+        }
       } else if (data.requestId === requestIdRef.current) {
         setRawResult({
           query: data.query,

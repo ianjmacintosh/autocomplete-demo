@@ -3,7 +3,11 @@ import { useDebouncedValue } from "./useDebouncedValue";
 import { useCorpus } from "./useCorpus";
 import { useNameSearchWorker } from "./useNameSearchWorker";
 import { getFuzzyMatches, getPrefixMatches } from "../lib/matching";
-import type { AutocompleteSettings, SearchMeta } from "../lib/types";
+import type {
+  AutocompleteSettings,
+  LoggedEventType,
+  SearchMeta,
+} from "../lib/types";
 
 export interface UseSuggestionsResult {
   suggestions: string[];
@@ -25,6 +29,7 @@ export interface UseSuggestionsResult {
 export function useSuggestions(
   query: string,
   settings: AutocompleteSettings,
+  onEvent?: (type: LoggedEventType, detail?: string) => void,
 ): UseSuggestionsResult {
   const {
     tierId,
@@ -38,8 +43,20 @@ export function useSuggestions(
 
   const { corpus, isLoading: corpusLoading } = useCorpus(tierId);
   const { value: debouncedQuery, isPending: debouncePending } =
-    useDebouncedValue(query, debounceMs);
-  const { search, result: workerResult } = useNameSearchWorker(tierId);
+    useDebouncedValue(
+      query,
+      debounceMs,
+      (value) => onEvent?.("debounceStart", value),
+      (value) => onEvent?.("debounceEnd", value),
+    );
+  const { search, result: workerResult } = useNameSearchWorker(
+    tierId,
+    (phase, detail) =>
+      onEvent?.(
+        phase,
+        detail?.count !== undefined ? String(detail.count) : detail?.query,
+      ),
+  );
 
   const isPending = debouncePending || corpusLoading;
 
@@ -74,7 +91,10 @@ export function useSuggestions(
     if (strategy === "fuzzy") return;
 
     const start = performance.now();
-    const matches = getPrefixMatches(debouncedQuery, corpus, maxResults);
+    const matches = getPrefixMatches(debouncedQuery, corpus, maxResults, {
+      onCountStart: () => onEvent?.("countStart", debouncedQuery),
+      onCountEnd: (count) => onEvent?.("countEnd", String(count)),
+    });
     const elapsedMs = performance.now() - start;
 
     if (matches.length > 0 || strategy === "prefix") {
@@ -83,7 +103,15 @@ export function useSuggestions(
         setMeta({ elapsedMs, ranOn: "main", strategyUsed: "prefix" });
       });
     }
-  }, [debouncedQuery, isPending, strategy, corpus, maxResults, minChars]);
+  }, [
+    debouncedQuery,
+    isPending,
+    strategy,
+    corpus,
+    maxResults,
+    minChars,
+    onEvent,
+  ]);
 
   // Fuzzy Match fallback (or the whole answer, for the "fuzzy" strategy) —
   // on the worker when Worker Mode is on, or synchronously right here on
@@ -113,6 +141,12 @@ export function useSuggestions(
       corpus,
       maxResults,
       distanceThreshold,
+      {
+        onCountStart: () => onEvent?.("countStart", debouncedQuery),
+        onCountEnd: (count) => onEvent?.("countEnd", String(count)),
+        onSortStart: () => onEvent?.("sortStart"),
+        onSortEnd: () => onEvent?.("sortEnd"),
+      },
     );
     const elapsedMs = performance.now() - start;
     queueMicrotask(() => {
@@ -129,6 +163,7 @@ export function useSuggestions(
     corpus,
     maxResults,
     distanceThreshold,
+    onEvent,
   ]);
 
   // Apply a worker response once it arrives, if it still answers the

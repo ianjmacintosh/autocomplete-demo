@@ -4,9 +4,9 @@ import { SettingsPanel } from "./Settings/SettingsPanel";
 import { TimingReadout } from "./TimingReadout/TimingReadout";
 import { StealItPanel } from "./StealIt/StealItPanel";
 import { EventLog } from "./EventLog/EventLog";
-import type { DomEventType, LoggedEvent } from "./EventLog/EventLog";
 import { useUrlSyncedSettings } from "../hooks/useUrlSyncedSettings";
 import { useSuggestions } from "../hooks/useSuggestions";
+import type { LoggedEvent, LoggedEventType } from "../lib/types";
 import "./App.css";
 
 const MAX_LOGGED_EVENTS = 200;
@@ -14,21 +14,34 @@ const MAX_LOGGED_EVENTS = 200;
 function App() {
   const [settings, updateSettings] = useUrlSyncedSettings();
   const [query, setQuery] = useState("");
-  const { suggestions, meta, corpusSize } = useSuggestions(query, settings);
 
   // Newest-first: paired with .event-log-list's flex-direction: column-reverse,
   // this keeps new entries anchored at the bottom of the panel without any
   // manual scroll management — scrolling up to review history just works.
   const [events, setEvents] = useState<LoggedEvent[]>([]);
   const nextEventId = useRef(0);
-  const logEvent = useCallback((type: DomEventType, key?: string) => {
+  const logEvent = useCallback((type: LoggedEventType, detail?: string) => {
     setEvents((prev) =>
       [
-        { id: nextEventId.current++, type, key, timestamp: Date.now() },
+        { id: nextEventId.current++, type, detail, timestamp: Date.now() },
         ...prev,
       ].slice(0, MAX_LOGGED_EVENTS),
     );
   }, []);
+
+  const { suggestions, meta, corpusSize } = useSuggestions(
+    query,
+    settings,
+    logEvent,
+  );
+
+  const handleQueryChange = useCallback(
+    (value: string) => {
+      logEvent("change", value);
+      setQuery(value);
+    },
+    [logEvent],
+  );
 
   return (
     <>
@@ -51,7 +64,7 @@ function App() {
 
         <Autocomplete
           value={query}
-          onChange={setQuery}
+          onChange={handleQueryChange}
           suggestions={suggestions}
           minChars={settings.minChars}
           onInputFocus={() => logEvent("focus")}

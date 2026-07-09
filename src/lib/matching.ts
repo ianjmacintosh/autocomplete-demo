@@ -4,20 +4,35 @@
 // prescription form"). Diff pillbug's file against that SHA to spot upstream
 // changes worth porting — no automated sync, this is a manual, occasional check.
 
+/**
+ * Optional instrumentation hooks so callers (the Event log) can narrate the
+ * counting/sorting phases of a match without the matching functions
+ * themselves knowing anything about logging.
+ */
+export interface MatchHooks {
+  onCountStart?: () => void;
+  onCountEnd?: (count: number) => void;
+  onSortStart?: () => void;
+  onSortEnd?: () => void;
+}
+
 /** Case-insensitive prefix match, capped at `maxResults` — near-free to check. */
 export function getPrefixMatches(
   query: string,
   corpus: readonly string[],
   maxResults: number,
+  hooks?: MatchHooks,
 ): string[] {
   const q = query.toLowerCase();
   const results: string[] = [];
+  hooks?.onCountStart?.();
   for (const entry of corpus) {
     if (entry.toLowerCase().startsWith(q)) {
       results.push(entry);
       if (results.length >= maxResults) break;
     }
   }
+  hooks?.onCountEnd?.(results.length);
   return results;
 }
 
@@ -48,10 +63,12 @@ export function getFuzzyMatches(
   corpus: readonly string[],
   maxResults: number,
   distanceThreshold: number,
+  hooks?: MatchHooks,
 ): string[] {
   const q = query.toLowerCase();
   const scored: { entry: string; normalized: number; raw: number }[] = [];
 
+  hooks?.onCountStart?.();
   for (const entry of corpus) {
     const lower = entry.toLowerCase();
     const raw = levenshteinDistance(q, lower);
@@ -60,7 +77,11 @@ export function getFuzzyMatches(
       scored.push({ entry, normalized, raw });
     }
   }
+  hooks?.onCountEnd?.(scored.length);
 
+  hooks?.onSortStart?.();
   scored.sort((a, b) => a.normalized - b.normalized || a.raw - b.raw);
+  hooks?.onSortEnd?.();
+
   return scored.slice(0, maxResults).map((s) => s.entry);
 }

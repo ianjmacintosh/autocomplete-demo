@@ -60,3 +60,6 @@ export interface LoggedEvent {
   detail?: string;
   timestamp: number;
 }
+
+/** Per-type on/off switch, so noisy event types can be silenced in the log. */
+export type LoggedEventTypeFilter = Record<LoggedEventType, boolean>;

@@ -17,14 +17,168 @@
   font-size: 0.75rem;
 }
 
-.event-log-title {
+.event-log-header {
   flex: 0 0 auto;
-  margin: 0 0 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.event-log-title {
+  margin: 0;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #75715e;
+}
+
+.event-log-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.event-log-action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid #49483e;
+  border-radius: 3px;
+  background: transparent;
+  color: #f8f8f2;
+  font-family: inherit;
+  font-size: 0.7rem;
+  line-height: 1;
+  padding: 0.3rem 0.45rem;
+  cursor: pointer;
+  appearance: none;
+}
+
+.event-log-action-button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Override the global button:focus rule (src/index.css) so its native
+   `outline: 4px auto -webkit-focus-ring-color` ring can't render alongside
+   this one — otherwise focusing the button shows two stacked rings. */
+.event-log-action-button:focus {
+  outline: none;
+}
+
+.event-log-action-button:focus-visible {
+  outline: 2px solid #66d9ef;
+  outline-offset: 1px;
+}
+
+.event-log-settings-popover {
+  background: #272822;
+  color: #f8f8f2;
+  border: 1px solid #49483e;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-family:
+    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.75rem;
+  min-width: 180px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.event-log-settings-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #49483e;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.65rem;
+  color: #75715e;
+}
+
+.event-log-settings-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #f8f8f2;
+  cursor: pointer;
+  padding: 0.15rem;
+  border-radius: 3px;
+  appearance: none;
+}
+
+.event-log-settings-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.event-log-settings-close:focus {
+  outline: none;
+}
+
+.event-log-settings-close:focus-visible {
+  outline: 2px solid #66d9ef;
+  outline-offset: 1px;
+}
+
+.event-log-settings-bulk-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.event-log-settings-bulk-button {
+  border: none;
+  background: transparent;
+  color: #66d9ef;
+  font-family: inherit;
+  font-size: 0.65rem;
+  padding: 0;
+  cursor: pointer;
+  appearance: none;
+}
+
+.event-log-settings-bulk-button:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.event-log-settings-bulk-button:disabled {
+  color: #75715e;
+  cursor: default;
+}
+
+.event-log-settings-bulk-button:focus {
+  outline: none;
+}
+
+.event-log-settings-bulk-button:focus-visible {
+  outline: 2px solid #66d9ef;
+  outline-offset: 1px;
+}
+
+.event-log-settings-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.event-log-settings-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
 }
 
 .event-log-empty {

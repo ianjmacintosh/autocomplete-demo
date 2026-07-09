@@ -1,14 +1,32 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Autocomplete } from "./Autocomplete/Autocomplete";
 import { SettingsPanel } from "./Settings/SettingsPanel";
 import { StealItPanel } from "./StealIt/StealItPanel";
 import { EventLog } from "./EventLog/EventLog";
 import { useUrlSyncedSettings } from "../hooks/useUrlSyncedSettings";
 import { useSuggestions } from "../hooks/useSuggestions";
-import type { LoggedEvent, LoggedEventType } from "../lib/types";
+import type {
+  LoggedEvent,
+  LoggedEventType,
+  LoggedEventTypeFilter,
+} from "../lib/types";
 import "./App.css";
 
 const MAX_LOGGED_EVENTS = 200;
+
+const ALL_EVENT_TYPES_ENABLED: LoggedEventTypeFilter = {
+  focus: true,
+  blur: true,
+  keydown: true,
+  keyup: true,
+  change: true,
+  debounceStart: true,
+  debounceEnd: true,
+  countStart: true,
+  countEnd: true,
+  sortStart: true,
+  sortEnd: true,
+};
 
 function App() {
   const [settings, updateSettings] = useUrlSyncedSettings();
@@ -19,7 +37,19 @@ function App() {
   // manual scroll management — scrolling up to review history just works.
   const [events, setEvents] = useState<LoggedEvent[]>([]);
   const nextEventId = useRef(0);
+
+  const [enabledEventTypes, setEnabledEventTypes] =
+    useState<LoggedEventTypeFilter>(ALL_EVENT_TYPES_ENABLED);
+  // logEvent is called from effects deep in useSuggestions, which re-run
+  // whenever its identity changes — a ref keeps it stable across toggles
+  // instead of tying its identity to enabledEventTypes.
+  const enabledEventTypesRef = useRef(enabledEventTypes);
+  useEffect(() => {
+    enabledEventTypesRef.current = enabledEventTypes;
+  }, [enabledEventTypes]);
+
   const logEvent = useCallback((type: LoggedEventType, detail?: string) => {
+    if (!enabledEventTypesRef.current[type]) return;
     setEvents((prev) =>
       [
         { id: nextEventId.current++, type, detail, timestamp: Date.now() },
@@ -27,6 +57,24 @@ function App() {
       ].slice(0, MAX_LOGGED_EVENTS),
     );
   }, []);
+
+  const toggleEventType = useCallback((type: LoggedEventType) => {
+    setEnabledEventTypes((prev) => ({ ...prev, [type]: !prev[type] }));
+  }, []);
+
+  const setAllEventTypes = useCallback((enabled: boolean) => {
+    setEnabledEventTypes(
+      () =>
+        Object.fromEntries(
+          Object.keys(ALL_EVENT_TYPES_ENABLED).map((type) => [
+            type,
+            enabled,
+          ]),
+        ) as LoggedEventTypeFilter,
+    );
+  }, []);
+
+  const clearEvents = useCallback(() => setEvents([]), []);
 
   const { suggestions } = useSuggestions(query, settings, logEvent);
 
@@ -94,7 +142,13 @@ function App() {
         </footer>
       </div>
 
-      <EventLog events={events} />
+      <EventLog
+        events={events}
+        enabledEventTypes={enabledEventTypes}
+        onToggleEventType={toggleEventType}
+        onSetAllEventTypes={setAllEventTypes}
+        onClear={clearEvents}
+      />
     </>
   );
 }

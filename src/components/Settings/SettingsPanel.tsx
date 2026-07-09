@@ -29,7 +29,7 @@ export function SettingsPanel({ settings, onChange }: SettingsPanelProps) {
     <form className="settings-panel" onSubmit={(e) => e.preventDefault()}>
       <fieldset>
         <legend>Dataset</legend>
-        <div className="settings-row">
+        <div className="settings-row settings-dataset-grid">
           {SIZE_TIERS.map((tier) => (
             <label key={tier.id} className="settings-radio">
               <input
@@ -39,7 +39,18 @@ export function SettingsPanel({ settings, onChange }: SettingsPanelProps) {
                 checked={settings.tierId === tier.id}
                 onChange={() => onChange({ tierId: tier.id as SizeTierId })}
               />
-              {tier.theme} ({tier.approxSize.toLocaleString()} entries)
+              <span>
+                {tier.theme} ({tier.approxSize.toLocaleString()} entries)
+              </span>
+              <a
+                href={tier.rawUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="settings-raw-link"
+                onClick={(e) => e.stopPropagation()}
+              >
+                view raw
+              </a>
             </label>
           ))}
         </div>

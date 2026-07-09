@@ -5,6 +5,7 @@ export interface SizeTier {
   approxSize: number;
   theme: string;
   load: () => Promise<string[]>;
+  rawUrl: string;
 }
 
 export const SIZE_TIERS: readonly SizeTier[] = [
@@ -13,12 +14,14 @@ export const SIZE_TIERS: readonly SizeTier[] = [
     approxSize: 118,
     theme: "Periodic table elements",
     load: () => import("./elements.json").then((m) => m.default as string[]),
+    rawUrl: new URL("./elements.json", import.meta.url).href,
   },
   {
     id: "cheeses",
     approxSize: 599,
     theme: "Cheese types",
     load: () => import("./cheeses.json").then((m) => m.default as string[]),
+    rawUrl: new URL("./cheeses.json", import.meta.url).href,
   },
   {
     id: "cities",
@@ -26,12 +29,14 @@ export const SIZE_TIERS: readonly SizeTier[] = [
     theme: "World cities",
     load: () =>
       import("./world-cities.json").then((m) => m.default as string[]),
+    rawUrl: new URL("./world-cities.json", import.meta.url).href,
   },
   {
     id: "books",
     approxSize: 100000,
     theme: "Book titles",
     load: () => import("./book-titles.json").then((m) => m.default as string[]),
+    rawUrl: new URL("./book-titles.json", import.meta.url).href,
   },
 ];
 

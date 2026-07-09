@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDebouncedValue } from "./useDebouncedValue";
-import { useCorpus } from "./useCorpus";
+import { useDataset } from "./useDataset";
 import { useNameSearchWorker } from "./useNameSearchWorker";
 import { getFuzzyMatches, getPrefixMatches } from "../lib/matching";
 import type {
@@ -12,16 +12,17 @@ import type {
 export interface UseSuggestionsResult {
   suggestions: string[];
   meta: SearchMeta | null;
-  corpusSize: number;
+  datasetSize: number;
 }
 
 // Generalized from ianjmacintosh/pillbug's useDrugNameSuggestions, extended
 // with a selectable Matching Strategy, a Worker Mode toggle whose "off"
 // position runs the exact same Fuzzy Match on the main thread instead of
-// skipping it, and a timing readout. Unlike pillbug's version, every
-// computation (including the "instant" prefix scan) runs inside an effect
-// rather than during render, since timing it requires `performance.now()`,
-// which this repo's stricter lint rules forbid calling during render.
+// skipping it, and per-search timing metadata. Unlike pillbug's version,
+// every computation (including the "instant" prefix scan) runs inside an
+// effect rather than during render, since timing it requires
+// `performance.now()`, which this repo's stricter lint rules forbid calling
+// during render.
 //
 // Ported at pillbug@6b19cd8 (#291). Diff pillbug's useDrugNameSuggestions
 // against that SHA to spot upstream changes worth porting — no automated
@@ -41,7 +42,7 @@ export function useSuggestions(
     debounceMs,
   } = settings;
 
-  const { corpus, isLoading: corpusLoading } = useCorpus(tierId);
+  const { dataset, isLoading: datasetLoading } = useDataset(tierId);
   const { value: debouncedQuery, isPending: debouncePending } =
     useDebouncedValue(
       query,
@@ -58,7 +59,7 @@ export function useSuggestions(
       ),
   );
 
-  const isPending = debouncePending || corpusLoading;
+  const isPending = debouncePending || datasetLoading;
 
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [meta, setMeta] = useState<SearchMeta | null>(null);
@@ -91,7 +92,7 @@ export function useSuggestions(
     if (strategy === "fuzzy") return;
 
     const start = performance.now();
-    const matches = getPrefixMatches(debouncedQuery, corpus, maxResults, {
+    const matches = getPrefixMatches(debouncedQuery, dataset, maxResults, {
       onCountStart: () => onEvent?.("countStart", debouncedQuery),
       onCountEnd: (count) => onEvent?.("countEnd", String(count)),
     });
@@ -107,7 +108,7 @@ export function useSuggestions(
     debouncedQuery,
     isPending,
     strategy,
-    corpus,
+    dataset,
     maxResults,
     minChars,
     onEvent,
@@ -124,7 +125,7 @@ export function useSuggestions(
     if (strategy === "combined") {
       const prefixMatches = getPrefixMatches(
         debouncedQuery,
-        corpus,
+        dataset,
         maxResults,
       );
       if (prefixMatches.length > 0) return;
@@ -138,7 +139,7 @@ export function useSuggestions(
     const start = performance.now();
     const results = getFuzzyMatches(
       debouncedQuery,
-      corpus,
+      dataset,
       maxResults,
       distanceThreshold,
       {
@@ -160,7 +161,7 @@ export function useSuggestions(
     workerModeOn,
     search,
     minChars,
-    corpus,
+    dataset,
     maxResults,
     distanceThreshold,
     onEvent,
@@ -185,6 +186,6 @@ export function useSuggestions(
   return {
     suggestions: query.length < minChars ? [] : suggestions,
     meta,
-    corpusSize: corpus.length,
+    datasetSize: dataset.length,
   };
 }

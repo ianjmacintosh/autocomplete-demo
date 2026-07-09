@@ -4,23 +4,23 @@ A single-page showcase of a configurable autocomplete widget (ported from the "A
 
 ## Language
 
-**Corpus**:
+**Dataset**:
 The full set of candidate strings a Matching Strategy searches against for the currently selected Size Tier.
-_Avoid_: dataset, word list, data source
+_Avoid_: corpus, word list, data source
 
 **Size Tier**:
-One of four fixed scales a visitor can select for the Corpus — 100, 1,000, 10,000, or 100,000 entries. Each tier is bound to its own themed, real-world Corpus (not a slice of one shared master list), so changing tiers changes both the scale and the flavor of the data together.
-_Avoid_: dataset size, corpus size
+One of four fixed scales a visitor can select for the Dataset — 100, 1,000, 10,000, or 100,000 entries. Each tier is bound to its own themed, real-world Dataset (not a slice of one shared master list), so changing tiers changes both the scale and the flavor of the data together.
+_Avoid_: corpus, corpus size
 
 **Matching Strategy**:
-The method used to compute suggestions from the Corpus for a given query. One of Prefix Match, Fuzzy Match, or Combined Match.
+The method used to compute suggestions from the Dataset for a given query. One of Prefix Match, Fuzzy Match, or Combined Match.
 _Avoid_: matching algorithm, search algorithm
 
 **Prefix Match**:
-A Matching Strategy that returns Corpus entries whose text starts with the query, case-insensitive.
+A Matching Strategy that returns Dataset entries whose text starts with the query, case-insensitive.
 
 **Fuzzy Match**:
-A Matching Strategy that returns Corpus entries within a normalized Levenshtein-distance threshold of the query, run in isolation (not only as a fallback).
+A Matching Strategy that returns Dataset entries within a normalized Levenshtein-distance threshold of the query, run in isolation (not only as a fallback).
 
 **Combined Match**:
 The Matching Strategy pillbug actually ships: try Prefix Match first, and only fall back to Fuzzy Match when Prefix Match returns nothing.

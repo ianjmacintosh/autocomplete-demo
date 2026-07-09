@@ -1,7 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { Autocomplete } from "./Autocomplete/Autocomplete";
 import { SettingsPanel } from "./Settings/SettingsPanel";
-import { TimingReadout } from "./TimingReadout/TimingReadout";
 import { StealItPanel } from "./StealIt/StealItPanel";
 import { EventLog } from "./EventLog/EventLog";
 import { useUrlSyncedSettings } from "../hooks/useUrlSyncedSettings";
@@ -29,11 +28,7 @@ function App() {
     );
   }, []);
 
-  const { suggestions, meta, corpusSize } = useSuggestions(
-    query,
-    settings,
-    logEvent,
-  );
+  const { suggestions } = useSuggestions(query, settings, logEvent);
 
   const handleQueryChange = useCallback(
     (value: string) => {
@@ -72,8 +67,6 @@ function App() {
           onInputKeyDown={(key) => logEvent("keydown", key)}
           onInputKeyUp={(key) => logEvent("keyup", key)}
         />
-        <TimingReadout meta={meta} corpusSize={corpusSize} />
-
         <SettingsPanel settings={settings} onChange={updateSettings} />
 
         <StealItPanel settings={settings} />

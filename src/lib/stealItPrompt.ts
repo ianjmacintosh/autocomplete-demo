@@ -13,7 +13,7 @@ export function buildStealItPrompt(settings: AutocompleteSettings): string {
     `Add an autocomplete/combobox input to my React app, ported from ianjmacintosh/pillbug's "Add Prescription" drug-name lookup (${PILLBUG_SOURCE_URL}), configured like this:`,
     "",
     `- Matching strategy: ${strategyDescription(settings.strategy)}`,
-    `- Corpus size: ~${tier.approxSize.toLocaleString()} entries (themed like: ${tier.theme})`,
+    `- Dataset size: ~${tier.approxSize.toLocaleString()} entries (themed like: ${tier.theme})`,
     `- Web Worker: ${
       settings.workerModeOn
         ? "on — fuzzy matching runs off the main thread"

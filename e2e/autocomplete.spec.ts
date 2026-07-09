@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 
-// Default settings (see src/lib/types.ts): Cheese types corpus, Combined
+// Default settings (see src/lib/types.ts): Cheese types dataset, Combined
 // strategy, Worker Mode on, 400ms debounce, minChars 3. "Brie" is a real
-// entry in that corpus with no prefix match for the typo "Brei" but a close
+// entry in that dataset with no prefix match for the typo "Brei" but a close
 // (normalized Levenshtein 0.5) fuzzy match, so it's used throughout to
 // distinguish Prefix from Fuzzy behavior.
 
@@ -57,23 +57,25 @@ test.describe("matching strategies", () => {
     await page.goto("/");
     await page.getByRole("radio", { name: /^Combined/ }).check();
     const input = page.getByRole("combobox");
-    const status = page.getByRole("status");
 
+    // Fuzzy Match only sorts its candidates (see src/lib/matching.ts), so a
+    // "sortStart" entry in the Event log is a reliable signal that Prefix
+    // Match came up empty and the Fuzzy fallback actually ran.
     await input.fill("Bri");
-    await expect(status).toContainText("prefix match");
     await expect(
       page.getByRole("option", { name: "Brie", exact: true }),
     ).toBeVisible();
+    await expect(page.locator(".event-log-entry--sortStart")).toHaveCount(0);
 
     await input.fill("Brei");
-    await expect(status).toContainText("fuzzy match");
     await expect(
       page.getByRole("option", { name: "Brie", exact: true }),
     ).toBeVisible();
+    await expect(page.locator(".event-log-entry--sortStart")).toHaveCount(1);
   });
 });
 
-test("switching Size Tier swaps in that tier's real corpus", async ({
+test("switching Size Tier swaps in that tier's real dataset", async ({
   page,
 }) => {
   await page.goto("/");
@@ -85,7 +87,7 @@ test("switching Size Tier swaps in that tier's real corpus", async ({
   ).toBeVisible();
 });
 
-test("Worker Mode toggle switches where Fuzzy Match actually runs", async ({
+test("Worker Mode off still resolves a Fuzzy Match typo, running synchronously on the main thread", async ({
   page,
 }) => {
   await page.goto("/");
@@ -94,13 +96,12 @@ test("Worker Mode toggle switches where Fuzzy Match actually runs", async ({
     name: "Run fuzzy matching in a Web Worker",
   });
   await expect(workerModeCheckbox).toBeChecked();
-
-  const status = page.getByRole("status");
-  await page.getByRole("combobox").fill("Brei");
-  await expect(status).toContainText("Web Worker");
-
   await workerModeCheckbox.uncheck();
-  await expect(status).toContainText("main thread");
+
+  await page.getByRole("combobox").fill("Brei");
+  await expect(
+    page.getByRole("option", { name: "Brie", exact: true }),
+  ).toBeVisible();
 });
 
 test("settings round-trip through the URL across a reload", async ({

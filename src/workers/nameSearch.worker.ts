@@ -3,7 +3,7 @@ import { getSizeTier } from "../data";
 import type { SizeTierId } from "../lib/types";
 
 export type WorkerRequest =
-  | { type: "setCorpus"; tierId: SizeTierId }
+  | { type: "setDataset"; tierId: SizeTierId }
   | {
       type: "search";
       requestId: number;
@@ -19,7 +19,7 @@ export type SearchProgressPhase =
   | "sortEnd";
 
 export type WorkerResponse =
-  | { type: "corpusReady"; tierId: SizeTierId }
+  | { type: "datasetReady"; tierId: SizeTierId }
   | {
       type: "searchProgress";
       requestId: number;
@@ -45,23 +45,23 @@ interface WorkerGlobalLike {
 
 const ctx = self as unknown as WorkerGlobalLike;
 
-let corpus: string[] = [];
+let dataset: string[] = [];
 let currentTierId: SizeTierId | undefined;
 
-// Loads its own copy of the corpus by tier id rather than having it
+// Loads its own copy of the dataset by tier id rather than having it
 // transferred over postMessage, so switching Worker Mode on doesn't require
 // shipping a 100,000-entry array across the thread boundary first.
 ctx.onmessage = (event) => {
   const msg = event.data;
 
-  if (msg.type === "setCorpus") {
+  if (msg.type === "setDataset") {
     currentTierId = msg.tierId;
     void getSizeTier(msg.tierId)
       .load()
       .then((loaded) => {
-        if (currentTierId !== msg.tierId) return; // superseded by a newer setCorpus
-        corpus = loaded;
-        ctx.postMessage({ type: "corpusReady", tierId: msg.tierId });
+        if (currentTierId !== msg.tierId) return; // superseded by a newer setDataset
+        dataset = loaded;
+        ctx.postMessage({ type: "datasetReady", tierId: msg.tierId });
       });
     return;
   }
@@ -69,7 +69,7 @@ ctx.onmessage = (event) => {
   const start = performance.now();
   const results = getFuzzyMatches(
     msg.query,
-    corpus,
+    dataset,
     msg.maxResults,
     msg.distanceThreshold,
     {
@@ -109,7 +109,7 @@ ctx.onmessage = (event) => {
     results,
     elapsedMs,
     // currentTierId is always set by the time a "search" message can arrive
-    // — the client only calls search() after corpusReady for some tier.
+    // — the client only calls search() after datasetReady for some tier.
     tierId: currentTierId!,
   });
 };

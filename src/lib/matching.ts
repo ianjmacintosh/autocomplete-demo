@@ -1,5 +1,5 @@
 // Ported from ianjmacintosh/pillbug's PrescriptionForm.helpers.ts, generalized
-// from drug names to any string corpus and parameterized instead of hardcoded.
+// from drug names to any string dataset and parameterized instead of hardcoded.
 // Ported at pillbug@6b19cd8 (#291, "Add medication name autocomplete to
 // prescription form"). Diff pillbug's file against that SHA to spot upstream
 // changes worth porting — no automated sync, this is a manual, occasional check.
@@ -19,14 +19,14 @@ export interface MatchHooks {
 /** Case-insensitive prefix match, capped at `maxResults` — near-free to check. */
 export function getPrefixMatches(
   query: string,
-  corpus: readonly string[],
+  dataset: readonly string[],
   maxResults: number,
   hooks?: MatchHooks,
 ): string[] {
   const q = query.toLowerCase();
   const results: string[] = [];
   hooks?.onCountStart?.();
-  for (const entry of corpus) {
+  for (const entry of dataset) {
     if (entry.toLowerCase().startsWith(q)) {
       results.push(entry);
       if (results.length >= maxResults) break;
@@ -60,7 +60,7 @@ export function levenshteinDistance(a: string, b: string): number {
  */
 export function getFuzzyMatches(
   query: string,
-  corpus: readonly string[],
+  dataset: readonly string[],
   maxResults: number,
   distanceThreshold: number,
   hooks?: MatchHooks,
@@ -69,7 +69,7 @@ export function getFuzzyMatches(
   const scored: { entry: string; normalized: number; raw: number }[] = [];
 
   hooks?.onCountStart?.();
-  for (const entry of corpus) {
+  for (const entry of dataset) {
     const lower = entry.toLowerCase();
     const raw = levenshteinDistance(q, lower);
     const normalized = raw / Math.max(q.length, lower.length, 1);

@@ -2,24 +2,24 @@ import { useEffect, useState } from "react";
 import { getSizeTier } from "../data";
 import type { SizeTierId } from "../lib/types";
 
-export interface UseCorpusResult {
-  corpus: string[];
+export interface UseDatasetResult {
+  dataset: string[];
   isLoading: boolean;
 }
 
-/** Loads the current Size Tier's corpus on the main thread. */
-export function useCorpus(tierId: SizeTierId): UseCorpusResult {
+/** Loads the current Size Tier's dataset on the main thread. */
+export function useDataset(tierId: SizeTierId): UseDatasetResult {
   const [loaded, setLoaded] = useState<{
     tierId: SizeTierId;
-    corpus: string[];
+    dataset: string[];
   } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     void getSizeTier(tierId)
       .load()
-      .then((corpus) => {
-        if (!cancelled) setLoaded({ tierId, corpus });
+      .then((dataset) => {
+        if (!cancelled) setLoaded({ tierId, dataset });
       });
     return () => {
       cancelled = true;
@@ -27,5 +27,5 @@ export function useCorpus(tierId: SizeTierId): UseCorpusResult {
   }, [tierId]);
 
   const isReady = loaded !== null && loaded.tierId === tierId;
-  return { corpus: isReady ? loaded.corpus : [], isLoading: !isReady };
+  return { dataset: isReady ? loaded.dataset : [], isLoading: !isReady };
 }

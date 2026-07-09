@@ -19,7 +19,7 @@ export interface NameSearchWorker {
     distanceThreshold: number,
   ) => void;
   result: NameSearchWorkerResult | null;
-  corpusReady: boolean;
+  datasetReady: boolean;
 }
 
 interface RawResult extends NameSearchWorkerResult {
@@ -27,7 +27,7 @@ interface RawResult extends NameSearchWorkerResult {
 }
 
 // Owns only the worker RPC lifecycle: creating/terminating the worker,
-// keeping its corpus in sync with `tierId`, and correlating responses to the
+// keeping its dataset in sync with `tierId`, and correlating responses to the
 // request/tier that triggered them so a stale response (from before a tier
 // switch) can't be applied.
 export function useNameSearchWorker(
@@ -58,7 +58,7 @@ export function useNameSearchWorker(
     workerRef.current = worker;
     worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
       const data = event.data;
-      if (data.type === "corpusReady") {
+      if (data.type === "datasetReady") {
         setReadyTierId(data.tierId);
       } else if (data.type === "searchProgress") {
         if (data.requestId === requestIdRef.current) {
@@ -83,7 +83,7 @@ export function useNameSearchWorker(
   }, []);
 
   useEffect(() => {
-    workerRef.current?.postMessage({ type: "setCorpus", tierId });
+    workerRef.current?.postMessage({ type: "setDataset", tierId });
   }, [tierId]);
 
   const search = useCallback(
@@ -103,6 +103,6 @@ export function useNameSearchWorker(
   return {
     search,
     result: rawResult && rawResult.tierId === tierId ? rawResult : null,
-    corpusReady: readyTierId === tierId,
+    datasetReady: readyTierId === tierId,
   };
 }

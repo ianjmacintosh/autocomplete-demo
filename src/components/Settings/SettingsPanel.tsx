@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { SIZE_TIERS } from "../../data";
 import type {
   AutocompleteSettings,
@@ -203,14 +204,30 @@ export function SettingsPanel({ settings, onChange }: SettingsPanelProps) {
   );
 }
 
-function strategyLabel(strategy: MatchingStrategy): string {
+function strategyLabel(strategy: MatchingStrategy): ReactNode {
   switch (strategy) {
     case "prefix":
-      return "Prefix Match";
+      return "Prefix Match (case-insensitive startsWith scan)";
     case "fuzzy":
-      return "Fuzzy Match";
+      return (
+        <>
+          Fuzzy Match{" "}
+          <span>
+            (
+            <a
+              href="https://en.wikipedia.org/wiki/Levenshtein_distance"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Levenshtein
+            </a>{" "}
+            edit distance)
+          </span>
+        </>
+      );
     case "combined":
-      return "Combined (pillbug's actual strategy)";
+      return "Combined";
   }
 }
 

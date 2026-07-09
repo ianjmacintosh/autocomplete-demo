@@ -78,7 +78,6 @@ ctx.onmessage = (event) => {
           type: "searchProgress",
           requestId: msg.requestId,
           phase: "countStart",
-          query: msg.query,
         }),
       onCountEnd: (count) =>
         ctx.postMessage({

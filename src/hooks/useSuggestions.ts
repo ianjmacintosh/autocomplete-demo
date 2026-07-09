@@ -47,7 +47,7 @@ export function useSuggestions(
     useDebouncedValue(
       query,
       debounceMs,
-      (value) => onEvent?.("debounceStart", value),
+      () => onEvent?.("debounceStart"),
       (value) => onEvent?.("debounceEnd", value),
     );
   const { search, result: workerResult } = useNameSearchWorker(
@@ -93,7 +93,7 @@ export function useSuggestions(
 
     const start = performance.now();
     const matches = getPrefixMatches(debouncedQuery, dataset, maxResults, {
-      onCountStart: () => onEvent?.("countStart", debouncedQuery),
+      onCountStart: () => onEvent?.("countStart"),
       onCountEnd: (count) => onEvent?.("countEnd", String(count)),
     });
     const elapsedMs = performance.now() - start;
@@ -143,7 +143,7 @@ export function useSuggestions(
       maxResults,
       distanceThreshold,
       {
-        onCountStart: () => onEvent?.("countStart", debouncedQuery),
+        onCountStart: () => onEvent?.("countStart"),
         onCountEnd: (count) => onEvent?.("countEnd", String(count)),
         onSortStart: () => onEvent?.("sortStart"),
         onSortEnd: () => onEvent?.("sortEnd"),

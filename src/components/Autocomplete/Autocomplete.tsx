@@ -6,6 +6,7 @@ import {
   ComboboxProvider,
   useComboboxStore,
 } from "@ariakit/react";
+import { X } from "lucide-react";
 import "./Autocomplete.css";
 
 interface AutocompleteProps {
@@ -39,16 +40,28 @@ export function Autocomplete({
 
   return (
     <ComboboxProvider store={combobox}>
-      <Combobox
-        id="autocomplete-demo-input"
-        className="autocomplete-input"
-        placeholder={`Type at least ${minChars} character${minChars === 1 ? "" : "s"}…`}
-        autoSelect
-        onFocus={onInputFocus}
-        onBlur={onInputBlur}
-        onKeyDown={(event) => onInputKeyDown?.(event.key)}
-        onKeyUp={(event) => onInputKeyUp?.(event.key)}
-      />
+      <div className="autocomplete-input-wrapper">
+        <Combobox
+          id="autocomplete-demo-input"
+          className="autocomplete-input"
+          placeholder={`Type at least ${minChars} character${minChars === 1 ? "" : "s"}…`}
+          autoSelect
+          onFocus={onInputFocus}
+          onBlur={onInputBlur}
+          onKeyDown={(event) => onInputKeyDown?.(event.key)}
+          onKeyUp={(event) => onInputKeyUp?.(event.key)}
+        />
+        {value.length > 0 && (
+          <button
+            type="button"
+            className="autocomplete-clear-button"
+            aria-label="Clear input"
+            onClick={() => onChange("")}
+          >
+            <X size={16} aria-hidden="true" />
+          </button>
+        )}
+      </div>
       {suggestions.length > 0 && (
         <ComboboxPopover sameWidth gutter={4} className="autocomplete-popover">
           <ComboboxList className="autocomplete-list">

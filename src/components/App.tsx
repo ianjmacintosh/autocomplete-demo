@@ -68,10 +68,7 @@ function App() {
     setEnabledEventTypes(
       () =>
         Object.fromEntries(
-          Object.keys(ALL_EVENT_TYPES_ENABLED).map((type) => [
-            type,
-            enabled,
-          ]),
+          Object.keys(ALL_EVENT_TYPES_ENABLED).map((type) => [type, enabled]),
         ) as LoggedEventTypeFilter,
     );
   }, []);

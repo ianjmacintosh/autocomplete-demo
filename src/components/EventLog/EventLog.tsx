@@ -6,20 +6,24 @@ import {
 } from "@ariakit/react";
 import { Settings, Trash2, X } from "lucide-react";
 import type {
+  Journey,
   LoggedEvent,
   LoggedEventType,
   LoggedEventTypeFilter,
 } from "../../lib/types";
+import { JourneyBar } from "./JourneyBar";
 import "./EventLog.css";
 
 export type { LoggedEvent, LoggedEventType };
 
 interface EventLogProps {
   events: LoggedEvent[];
+  journey: Journey | null;
   enabledEventTypes: LoggedEventTypeFilter;
   onToggleEventType: (type: LoggedEventType) => void;
   onSetAllEventTypes: (enabled: boolean) => void;
   onClear: () => void;
+  onClearJourney: () => void;
 }
 
 const EVENT_LABEL: Record<LoggedEventType, string> = {
@@ -28,6 +32,7 @@ const EVENT_LABEL: Record<LoggedEventType, string> = {
   keydown: "keyDown",
   keyup: "keyUp",
   change: "change",
+  select: "select",
   debounceStart: "debounceStart",
   debounceEnd: "debounceEnd",
   countStart: "countStart",
@@ -40,10 +45,12 @@ const EVENT_TYPES = Object.keys(EVENT_LABEL) as LoggedEventType[];
 
 export function EventLog({
   events,
+  journey,
   enabledEventTypes,
   onToggleEventType,
   onSetAllEventTypes,
   onClear,
+  onClearJourney,
 }: EventLogProps) {
   const allEnabled = EVENT_TYPES.every((type) => enabledEventTypes[type]);
   return (
@@ -129,6 +136,7 @@ export function EventLog({
           ))}
         </ol>
       )}
+      <JourneyBar events={events} journey={journey} onReset={onClearJourney} />
     </aside>
   );
 }

@@ -46,6 +46,7 @@ export type LoggedEventType =
   | "keydown"
   | "keyup"
   | "change"
+  | "select"
   | "debounceStart"
   | "debounceEnd"
   | "countStart"
@@ -63,3 +64,13 @@ export interface LoggedEvent {
 
 /** Per-type on/off switch, so noisy event types can be silenced in the log. */
 export type LoggedEventTypeFilter = Record<LoggedEventType, boolean>;
+
+/**
+ * One "journey": the span from the first character typed into an empty
+ * input to the moment the user either picks a suggestion or blurs the
+ * field. `end` is null while the journey is still in progress.
+ */
+export interface Journey {
+  start: number;
+  end: number | null;
+}

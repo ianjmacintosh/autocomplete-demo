@@ -18,6 +18,7 @@ interface AutocompleteProps {
   onInputBlur?: () => void;
   onInputKeyDown?: (key: string) => void;
   onInputKeyUp?: (key: string) => void;
+  onOptionSelect?: (value: string) => void;
 }
 
 // Generalized from ianjmacintosh/pillbug's DrugNameCombobox.tsx. Purely
@@ -35,6 +36,7 @@ export function Autocomplete({
   onInputBlur,
   onInputKeyDown,
   onInputKeyUp,
+  onOptionSelect,
 }: AutocompleteProps) {
   const combobox = useComboboxStore({ value, setValue: onChange });
 
@@ -70,6 +72,7 @@ export function Autocomplete({
                 key={entry}
                 value={entry}
                 className="autocomplete-item"
+                onClick={() => onOptionSelect?.(entry)}
               />
             ))}
           </ComboboxList>

@@ -6,6 +6,7 @@ import { EventLog } from "./EventLog/EventLog";
 import { useUrlSyncedSettings } from "../hooks/useUrlSyncedSettings";
 import { useSuggestions } from "../hooks/useSuggestions";
 import type {
+  Journey,
   LoggedEvent,
   LoggedEventType,
   LoggedEventTypeFilter,
@@ -20,6 +21,7 @@ const ALL_EVENT_TYPES_ENABLED: LoggedEventTypeFilter = {
   keydown: true,
   keyup: true,
   change: true,
+  select: true,
   debounceStart: true,
   debounceEnd: true,
   countStart: true,
@@ -76,11 +78,34 @@ function App() {
 
   const clearEvents = useCallback(() => setEvents([]), []);
 
+  // A "journey" spans from the first character typed into an empty input to
+  // the moment the visitor either picks a suggestion or blurs the field —
+  // rendered as a segmented bar under the Event log. `end` stays null while
+  // the journey is still in progress.
+  const [journey, setJourney] = useState<Journey | null>(null);
+  const prevQueryRef = useRef("");
+
+  const completeJourney = useCallback(() => {
+    setJourney((prev) =>
+      prev && prev.end === null ? { ...prev, end: Date.now() } : prev,
+    );
+  }, []);
+
+  const clearJourney = useCallback(() => setJourney(null), []);
+
   const { suggestions } = useSuggestions(query, settings, logEvent);
 
   const handleQueryChange = useCallback(
     (value: string) => {
       logEvent("change", value);
+      const wasEmpty = prevQueryRef.current.length === 0;
+      prevQueryRef.current = value;
+      if (wasEmpty && value.length > 0) {
+        setJourney({ start: Date.now(), end: null });
+      } else if (value.length === 0) {
+        // Abandoned before reaching an end condition — nothing to show.
+        setJourney((prev) => (prev && prev.end === null ? null : prev));
+      }
       setQuery(value);
     },
     [logEvent],
@@ -111,9 +136,16 @@ function App() {
           suggestions={suggestions}
           minChars={settings.minChars}
           onInputFocus={() => logEvent("focus")}
-          onInputBlur={() => logEvent("blur")}
+          onInputBlur={() => {
+            logEvent("blur");
+            completeJourney();
+          }}
           onInputKeyDown={(key) => logEvent("keydown", key)}
           onInputKeyUp={(key) => logEvent("keyup", key)}
+          onOptionSelect={(selected) => {
+            logEvent("select", selected);
+            completeJourney();
+          }}
         />
         <SettingsPanel settings={settings} onChange={updateSettings} />
 
@@ -144,10 +176,12 @@ function App() {
 
       <EventLog
         events={events}
+        journey={journey}
         enabledEventTypes={enabledEventTypes}
         onToggleEventType={toggleEventType}
         onSetAllEventTypes={setAllEventTypes}
         onClear={clearEvents}
+        onClearJourney={clearJourney}
       />
     </>
   );

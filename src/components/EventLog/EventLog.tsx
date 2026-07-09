@@ -46,7 +46,6 @@ export function EventLog({
   onClear,
 }: EventLogProps) {
   const allEnabled = EVENT_TYPES.every((type) => enabledEventTypes[type]);
-  const allDisabled = EVENT_TYPES.every((type) => !enabledEventTypes[type]);
   return (
     <aside className="event-log" aria-label="Input and search event log">
       <div className="event-log-header">
@@ -82,24 +81,14 @@ export function EventLog({
                   <X size={14} aria-hidden="true" />
                 </PopoverDismiss>
               </div>
-              <div className="event-log-settings-bulk-actions">
-                <button
-                  type="button"
-                  className="event-log-settings-bulk-button"
-                  onClick={() => onSetAllEventTypes(true)}
-                  disabled={allEnabled}
-                >
-                  Select all
-                </button>
-                <button
-                  type="button"
-                  className="event-log-settings-bulk-button"
-                  onClick={() => onSetAllEventTypes(false)}
-                  disabled={allDisabled}
-                >
-                  Deselect all
-                </button>
-              </div>
+              <label className="event-log-settings-item event-log-settings-item--all">
+                <input
+                  type="checkbox"
+                  checked={allEnabled}
+                  onChange={(e) => onSetAllEventTypes(e.target.checked)}
+                />
+                ALL
+              </label>
               <ul className="event-log-settings-list">
                 {EVENT_TYPES.map((type) => (
                   <li key={type}>

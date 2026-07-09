@@ -128,39 +128,12 @@
   outline-offset: 1px;
 }
 
-.event-log-settings-bulk-actions {
-  display: flex;
-  gap: 0.6rem;
-  margin-bottom: 0.4rem;
-}
-
-.event-log-settings-bulk-button {
-  border: none;
-  background: transparent;
-  color: #66d9ef;
-  font-family: inherit;
-  font-size: 0.65rem;
-  padding: 0;
-  cursor: pointer;
-  appearance: none;
-}
-
-.event-log-settings-bulk-button:hover:not(:disabled) {
-  text-decoration: underline;
-}
-
-.event-log-settings-bulk-button:disabled {
-  color: #75715e;
-  cursor: default;
-}
-
-.event-log-settings-bulk-button:focus {
-  outline: none;
-}
-
-.event-log-settings-bulk-button:focus-visible {
-  outline: 2px solid #66d9ef;
-  outline-offset: 1px;
+.event-log-settings-item--all {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
+  border-bottom: 1px solid #49483e;
 }
 
 .event-log-settings-list {

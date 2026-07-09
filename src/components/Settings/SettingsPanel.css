@@ -1,0 +1,104 @@
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.settings-panel fieldset {
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem 1rem;
+}
+
+.settings-panel fieldset:disabled {
+  opacity: 0.5;
+}
+
+.settings-panel legend {
+  font-weight: 600;
+  padding: 0 0.35rem;
+}
+
+.settings-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.settings-radio,
+.settings-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.settings-radio,
+.settings-checkbox,
+.settings-field {
+  padding: 1rem 0.5rem;
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+
+.settings-radio:hover,
+.settings-checkbox:hover,
+.settings-field:hover {
+  background-color: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.settings-dataset-grid {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 0.6rem;
+  row-gap: 0.4rem;
+}
+
+.settings-dataset-grid .settings-radio {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.settings-number {
+  width: 4.5rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 0.35rem;
+  background: var(--input-bg, #fff);
+  color: inherit;
+}
+
+.settings-raw-link {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.settings-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+@media (prefers-color-scheme: dark) {
+  .settings-panel fieldset {
+    border-color: #444;
+  }
+
+  .settings-number {
+    border-color: #444;
+    background: #1e1e1e;
+  }
+}

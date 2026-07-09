@@ -1,0 +1,263 @@
+/* Deliberately always Monokai-dark, independent of the page's own
+   light/dark theme — this is a fixed console-style aesthetic, not a
+   themed component. */
+.event-log {
+  grid-column: 2;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: #272822;
+  color: #f8f8f2;
+  padding: 0.75rem;
+  font-family:
+    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.75rem;
+}
+
+.event-log-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.event-log-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #75715e;
+}
+
+.event-log-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.event-log-action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid #49483e;
+  border-radius: 3px;
+  background: transparent;
+  color: #f8f8f2;
+  font-family: inherit;
+  font-size: 0.7rem;
+  line-height: 1;
+  padding: 0.3rem 0.45rem;
+  cursor: pointer;
+  appearance: none;
+}
+
+.event-log-action-button:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Override the global button:focus rule (src/index.css) so its native
+   `outline: 4px auto -webkit-focus-ring-color` ring can't render alongside
+   this one — otherwise focusing the button shows two stacked rings. */
+.event-log-action-button:focus {
+  outline: none;
+}
+
+.event-log-action-button:focus-visible {
+  outline: 2px solid #66d9ef;
+  outline-offset: 1px;
+}
+
+.event-log-settings-popover {
+  background: #272822;
+  color: #f8f8f2;
+  border: 1px solid #49483e;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-family:
+    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.75rem;
+  min-width: 180px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.event-log-settings-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid #49483e;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.65rem;
+  color: #75715e;
+}
+
+.event-log-settings-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #f8f8f2;
+  cursor: pointer;
+  padding: 0.15rem;
+  border-radius: 3px;
+  appearance: none;
+}
+
+.event-log-settings-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.event-log-settings-close:focus {
+  outline: none;
+}
+
+.event-log-settings-close:focus-visible {
+  outline: 2px solid #66d9ef;
+  outline-offset: 1px;
+}
+
+.event-log-settings-item--all {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
+  border-bottom: 1px solid #49483e;
+}
+
+.event-log-settings-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.event-log-settings-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.event-log-empty {
+  flex: 1 1 auto;
+  margin: 0;
+  color: #75715e;
+  font-style: italic;
+}
+
+.event-log-list {
+  /* Fills all remaining height below the title and owns its own scroll, so
+     column-reverse packing (below) actually has room to anchor at the
+     bottom instead of shrinking to fit its content. */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  /* Entries arrive newest-first in the DOM; column-reverse flips them so
+     the newest renders at the bottom and the stack grows upward, with
+     scrollTop naturally anchored there until the visitor scrolls up. */
+  flex-direction: column-reverse;
+  gap: 0.2rem;
+}
+
+.event-log-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.15rem 0.35rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.event-log-timestamp {
+  flex-shrink: 0;
+  color: #75715e;
+}
+
+.event-log-type {
+  font-weight: 600;
+}
+
+.event-log-entry--focus .event-log-type {
+  color: #a6e22e;
+}
+
+.event-log-entry--blur .event-log-type {
+  color: #fd971f;
+}
+
+.event-log-entry--keydown .event-log-type {
+  color: #66d9ef;
+}
+
+.event-log-entry--keyup .event-log-type {
+  color: #ae81ff;
+}
+
+.event-log-entry--change .event-log-type {
+  color: #e6db74;
+}
+
+.event-log-entry--select .event-log-type {
+  color: #a9e34b;
+}
+
+/* Search internals: paired start/end phases share a hue, dim for the start
+   of a phase and bright once it's settled/finished. */
+.event-log-entry--debounceStart .event-log-type {
+  color: #c2418f;
+}
+
+.event-log-entry--debounceEnd .event-log-type {
+  color: #f92672;
+}
+
+.event-log-entry--countStart .event-log-type {
+  color: #3a94a6;
+}
+
+.event-log-entry--countEnd .event-log-type {
+  color: #38f9c0;
+}
+
+.event-log-entry--sortStart .event-log-type {
+  color: #7a5fa6;
+}
+
+.event-log-entry--sortEnd .event-log-type {
+  color: #d291ff;
+}
+
+.event-log-key {
+  margin-left: auto;
+  color: #e6db74;
+}
+
+/* Stacked mobile layout (see App.css): dock to the top of the viewport
+   instead of the side. Height is fixed (not content-driven) so the panel
+   doesn't grow as events arrive and push the heading/input around. */
+@media (max-width: 700px) {
+  .event-log {
+    grid-column: 1;
+    grid-row: 1;
+    height: 35vh;
+  }
+}

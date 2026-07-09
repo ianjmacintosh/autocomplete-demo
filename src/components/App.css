@@ -32,8 +32,19 @@
   margin-top: 2.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--border-color, #ddd);
-  font-size: 0.8rem;
-  opacity: 0.65;
+  font-size: 0.9rem;
+  /* 65% failed WCAG AA (4.29:1) against a white background in light mode. */
+  color: color-mix(in srgb, currentColor 75%, transparent);
+}
+
+.app-footer a {
+  /* Links must stay at full strength so they keep their contrast ratio;
+     only the surrounding footer prose is dimmed. */
+  color: var(--link-color);
+}
+
+.app-footer a:hover {
+  color: var(--link-hover-color);
 }
 
 .app-footer p {
@@ -43,6 +54,12 @@
 @media (prefers-color-scheme: dark) {
   .app-footer {
     border-top-color: #444;
+  }
+}
+
+@media (max-width: 700px) {
+  .app-footer {
+    font-size: 0.95rem;
   }
 }
 

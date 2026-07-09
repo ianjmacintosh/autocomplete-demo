@@ -31,7 +31,6 @@ export function Autocomplete({
   value,
   onChange,
   suggestions,
-  minChars,
   onInputFocus,
   onInputBlur,
   onInputKeyDown,
@@ -46,7 +45,6 @@ export function Autocomplete({
         <Combobox
           id="autocomplete-demo-input"
           className="autocomplete-input"
-          placeholder={`Type at least ${minChars} character${minChars === 1 ? "" : "s"}…`}
           onFocus={onInputFocus}
           onBlur={onInputBlur}
           onKeyDown={(event) => onInputKeyDown?.(event.key)}

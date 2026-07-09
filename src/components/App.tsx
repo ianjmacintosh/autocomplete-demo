@@ -112,20 +112,30 @@ function App() {
     <>
       <div className="app-main">
         <header className="app-header">
-          <h1>Autocomplete, tuned to your use case</h1>
-          <p>
-            A configurable port of the drug-name lookup from{" "}
-            <a
-              href="https://github.com/ianjmacintosh/pillbug"
-              target="_blank"
-              rel="noreferrer"
-            >
-              ianjmacintosh/pillbug
-            </a>
-            's "Add Prescription" flow. Change the settings below and try
-            typing.
-          </p>
+          <h1>Autocomplete</h1>
         </header>
+
+        <p>
+          I spent a couple of days building and refining an autocomplete input
+          with Sonnet 5.0. It was fun, but I don't want to make this all over
+          again next time I need an autocomplete input, so I made a note to
+          reference this implementation in the future. Then I realized there are
+          probably lots of other people who could use the same thing for their
+          projects.
+        </p>
+        <p>
+          Give it a spin. I hope you find it useful and shamelessly steal it.
+          Make it your own!
+        </p>
+        <p>
+          You can try out different datasets and filtering options, and I've
+          included verbose event logging so you can understand what's happening
+          under the hood.
+        </p>
+
+        <label htmlFor="autocomplete-demo-input">
+          This input uses the {settings.tierId} dataset:
+        </label>
 
         <Autocomplete
           value={query}
@@ -156,6 +166,16 @@ function App() {
               rel="noreferrer"
             >
               City data from GeoNames (CC BY 4.0)
+            </a>
+          </p>
+          <p>
+            Implementation stolen from{" "}
+            <a
+              href="https://github.com/ianjmacintosh/pillbug"
+              target="_blank"
+              rel="noreferrer"
+            >
+              ianjmacintosh/pillbug
             </a>
           </p>
           <p>

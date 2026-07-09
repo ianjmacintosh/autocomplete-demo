@@ -81,14 +81,19 @@
 }
 
 .settings-raw-link {
-  font-size: 0.8rem;
-  opacity: 0.7;
+  font-size: 0.85rem;
 }
 
 .settings-hint {
   margin: 0.5rem 0 0;
   font-size: 0.85rem;
   opacity: 0.75;
+}
+
+@media (max-width: 700px) {
+  .settings-raw-link {
+    font-size: 0.9rem;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

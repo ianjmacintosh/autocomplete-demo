@@ -15,6 +15,10 @@ export interface UseSuggestionsResult {
   datasetSize: number;
 }
 
+function formatResultCount(count: number): string {
+  return `${count} match${count === 1 ? "" : "es"}`;
+}
+
 // Generalized from ianjmacintosh/pillbug's useDrugNameSuggestions, extended
 // with a selectable Matching Strategy, a Worker Mode toggle whose "off"
 // position runs the exact same Fuzzy Match on the main thread instead of
@@ -48,14 +52,16 @@ export function useSuggestions(
       query,
       debounceMs,
       () => onEvent?.("debounceStart"),
-      (value) => onEvent?.("debounceEnd", value),
+      () => onEvent?.("debounceEnd"),
     );
   const { search, result: workerResult } = useNameSearchWorker(
     tierId,
     (phase, detail) =>
       onEvent?.(
         phase,
-        detail?.count !== undefined ? String(detail.count) : detail?.query,
+        detail?.count !== undefined
+          ? formatResultCount(detail.count)
+          : detail?.query,
       ),
   );
 
@@ -94,7 +100,7 @@ export function useSuggestions(
     const start = performance.now();
     const matches = getPrefixMatches(debouncedQuery, dataset, maxResults, {
       onCountStart: () => onEvent?.("countStart"),
-      onCountEnd: (count) => onEvent?.("countEnd", String(count)),
+      onCountEnd: (count) => onEvent?.("countEnd", formatResultCount(count)),
     });
     const elapsedMs = performance.now() - start;
 
@@ -144,7 +150,7 @@ export function useSuggestions(
       distanceThreshold,
       {
         onCountStart: () => onEvent?.("countStart"),
-        onCountEnd: (count) => onEvent?.("countEnd", String(count)),
+        onCountEnd: (count) => onEvent?.("countEnd", formatResultCount(count)),
         onSortStart: () => onEvent?.("sortStart"),
         onSortEnd: () => onEvent?.("sortEnd"),
       },

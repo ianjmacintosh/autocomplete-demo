@@ -47,7 +47,6 @@ export function Autocomplete({
           id="autocomplete-demo-input"
           className="autocomplete-input"
           placeholder={`Type at least ${minChars} character${minChars === 1 ? "" : "s"}…`}
-          autoSelect
           onFocus={onInputFocus}
           onBlur={onInputBlur}
           onKeyDown={(event) => onInputKeyDown?.(event.key)}

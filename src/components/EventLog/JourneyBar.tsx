@@ -11,14 +11,22 @@ interface JourneyBarProps {
 }
 
 // Pairs up countStart/countEnd and sortStart/sortEnd within the journey's
-// range to total up algorithmic compute time, on whichever thread ran it.
-function computeCpuMs(events: LoggedEvent[], start: number, end: number): number {
+// range to total up the search's own compute time, on whichever thread ran
+// it. This is deliberately narrow — just the count/sort steps themselves,
+// not all main-thread work — so it isn't a superset of computeBlockedMs
+// below; most of a journey's blocking usually comes from elsewhere
+// (rendering each keystroke, event handling, GC), not from matching itself.
+function computeMatchSortMs(
+  events: LoggedEvent[],
+  start: number,
+  end: number,
+): number {
   const inRange = events
     .filter((event) => event.timestamp >= start && event.timestamp <= end)
     .slice()
     .reverse(); // events arrive newest-first; pairing needs chronological order
 
-  let cpuMs = 0;
+  let matchSortMs = 0;
   let openCountAt: number | null = null;
   let openSortAt: number | null = null;
 
@@ -26,17 +34,17 @@ function computeCpuMs(events: LoggedEvent[], start: number, end: number): number
     if (event.type === "countStart") {
       openCountAt = event.timestamp;
     } else if (event.type === "countEnd" && openCountAt !== null) {
-      cpuMs += event.timestamp - openCountAt;
+      matchSortMs += event.timestamp - openCountAt;
       openCountAt = null;
     } else if (event.type === "sortStart") {
       openSortAt = event.timestamp;
     } else if (event.type === "sortEnd" && openSortAt !== null) {
-      cpuMs += event.timestamp - openSortAt;
+      matchSortMs += event.timestamp - openSortAt;
       openSortAt = null;
     }
   }
 
-  return cpuMs;
+  return matchSortMs;
 }
 
 // Sums how much of the journey overlapped a real main-thread freeze (a Long
@@ -78,7 +86,7 @@ export function JourneyBar({
 
   const { start, end } = journey;
   const totalMs = end - start;
-  const cpuMs = Math.round(computeCpuMs(events, start, end));
+  const matchSortMs = Math.round(computeMatchSortMs(events, start, end));
   const blockedMs = Math.round(computeBlockedMs(longTasks, start, end));
 
   return (
@@ -102,14 +110,20 @@ export function JourneyBar({
         className="journey-bar-stats"
         aria-label={`User journey from first keystroke to blur, lasting ${totalMs} milliseconds`}
       >
-        <div className="journey-bar-stat">
-          <dt className="journey-bar-stat-label">CPU processing</dt>
-          <dd className="journey-bar-stat-value journey-bar-stat-value--cpu">
-            {cpuMs}ms
+        <div
+          className="journey-bar-stat"
+          title="Time spent inside the search's own count/sort steps, on whichever thread ran them. Narrow by design — not total CPU work, so it isn't guaranteed to bound Main thread blocked."
+        >
+          <dt className="journey-bar-stat-label">Match/sort time</dt>
+          <dd className="journey-bar-stat-value journey-bar-stat-value--compute">
+            {matchSortMs}ms
           </dd>
         </div>
-        <div className="journey-bar-stat">
-          <dt className="journey-bar-stat-label">User blocked</dt>
+        <div
+          className="journey-bar-stat"
+          title="Total time the main thread was frozen (any task over ~50ms) during this journey — rendering each keystroke, event handling, and GC included, not just matching."
+        >
+          <dt className="journey-bar-stat-label">Main thread blocked</dt>
           <dd className="journey-bar-stat-value journey-bar-stat-value--blocked">
             {blockedMs}ms
           </dd>

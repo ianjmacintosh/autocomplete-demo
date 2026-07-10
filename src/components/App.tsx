@@ -16,18 +16,23 @@ import "./App.css";
 
 const MAX_LOGGED_EVENTS = 200;
 
-const ALL_EVENT_TYPES_ENABLED: LoggedEventTypeFilter = {
+// keydown/keyup/select/countStart/sortStart are off by default: keydown and
+// keyup in particular report event.key as "Unidentified" while a mobile IME
+// (e.g. Android's Gboard) is composing, which reads as a bug in the log
+// rather than the platform quirk it actually is. Still toggleable from the
+// event log's settings popover for anyone who wants the raw stream.
+const DEFAULT_EVENT_TYPE_FILTER: LoggedEventTypeFilter = {
   focus: true,
   blur: true,
-  keydown: true,
-  keyup: true,
+  keydown: false,
+  keyup: false,
   change: true,
-  select: true,
+  select: false,
   debounceStart: true,
   debounceEnd: true,
-  countStart: true,
+  countStart: false,
   countEnd: true,
-  sortStart: true,
+  sortStart: false,
   sortEnd: true,
 };
 
@@ -42,7 +47,7 @@ function App() {
   const nextEventId = useRef(0);
 
   const [enabledEventTypes, setEnabledEventTypes] =
-    useState<LoggedEventTypeFilter>(ALL_EVENT_TYPES_ENABLED);
+    useState<LoggedEventTypeFilter>(DEFAULT_EVENT_TYPE_FILTER);
   // logEvent is called from effects deep in useSuggestions, which re-run
   // whenever its identity changes — a ref keeps it stable across toggles
   // instead of tying its identity to enabledEventTypes.
@@ -51,29 +56,26 @@ function App() {
     enabledEventTypesRef.current = enabledEventTypes;
   }, [enabledEventTypes]);
 
-  const logEvent = useCallback(
-    (type: LoggedEventType, detail?: string) => {
-      if (!enabledEventTypesRef.current[type]) return;
-      // Captured here, not inside the updater below — React can defer that
-      // updater until after several logEvent calls have already queued,
-      // which would stamp back-to-back phase boundaries (e.g. countStart
-      // right before an expensive synchronous loop, countEnd right after)
-      // with the same instant instead of the real gap between them.
-      const timestamp = Date.now();
-      setEvents((prev) =>
-        [
-          {
-            id: nextEventId.current++,
-            type,
-            detail,
-            timestamp,
-          },
-          ...prev,
-        ].slice(0, MAX_LOGGED_EVENTS),
-      );
-    },
-    [],
-  );
+  const logEvent = useCallback((type: LoggedEventType, detail?: string) => {
+    if (!enabledEventTypesRef.current[type]) return;
+    // Captured here, not inside the updater below — React can defer that
+    // updater until after several logEvent calls have already queued,
+    // which would stamp back-to-back phase boundaries (e.g. countStart
+    // right before an expensive synchronous loop, countEnd right after)
+    // with the same instant instead of the real gap between them.
+    const timestamp = Date.now();
+    setEvents((prev) =>
+      [
+        {
+          id: nextEventId.current++,
+          type,
+          detail,
+          timestamp,
+        },
+        ...prev,
+      ].slice(0, MAX_LOGGED_EVENTS),
+    );
+  }, []);
 
   const toggleEventType = useCallback((type: LoggedEventType) => {
     setEnabledEventTypes((prev) => ({ ...prev, [type]: !prev[type] }));
@@ -83,7 +85,7 @@ function App() {
     setEnabledEventTypes(
       () =>
         Object.fromEntries(
-          Object.keys(ALL_EVENT_TYPES_ENABLED).map((type) => [type, enabled]),
+          Object.keys(DEFAULT_EVENT_TYPE_FILTER).map((type) => [type, enabled]),
         ) as LoggedEventTypeFilter,
     );
   }, []);

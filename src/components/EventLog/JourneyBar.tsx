@@ -87,9 +87,7 @@ function Stat({ label, value, valueClassName, description }: StatProps) {
         aria-label={`${label}: ${value}`}
       >
         <dt className="journey-bar-stat-label">{label}</dt>
-        <dd className={`journey-bar-stat-value ${valueClassName}`}>
-          {value}
-        </dd>
+        <dd className={`journey-bar-stat-value ${valueClassName}`}>{value}</dd>
       </TooltipAnchor>
       <Tooltip className="journey-bar-tooltip">{description}</Tooltip>
     </TooltipProvider>

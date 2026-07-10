@@ -56,6 +56,9 @@ export function EventLog({
   onClearJourney,
 }: EventLogProps) {
   const allEnabled = EVENT_TYPES.every((type) => enabledEventTypes[type]);
+  // Display-only filter — JourneyBar below still gets the full, unfiltered
+  // `events` so its stats stay correct regardless of what's shown here.
+  const visibleEvents = events.filter((event) => enabledEventTypes[event.type]);
   return (
     <aside className="event-log" aria-label="Input and search event log">
       <div className="event-log-header">
@@ -117,13 +120,13 @@ export function EventLog({
           </PopoverProvider>
         </div>
       </div>
-      {events.length === 0 ? (
+      {visibleEvents.length === 0 ? (
         <p className="event-log-empty">
           Focus the input to start logging events…
         </p>
       ) : (
         <ol className="event-log-list">
-          {events.map((event) => (
+          {visibleEvents.map((event) => (
             <li
               key={event.id}
               className={`event-log-entry event-log-entry--${event.type}`}

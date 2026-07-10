@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Autocomplete } from "./Autocomplete/Autocomplete";
 import { SettingsPanel } from "./Settings/SettingsPanel";
 import { StealItPanel } from "./StealIt/StealItPanel";
@@ -16,16 +16,17 @@ import "./App.css";
 
 const MAX_LOGGED_EVENTS = 200;
 
+// This only controls what the visible log renders (see EventLog's own
+// filtering) — it must never gate what logEvent records. JourneyBar derives
+// its stats (Match/sort time, Main thread blocked) from the same full event
+// history, and a Start/End pair (countStart/countEnd, sortStart/sortEnd)
+// silently produces a wrong measurement if one half went unrecorded because
+// a user hid it from the log.
+//
 // keydown/keyup/select are off by default: keydown and keyup in particular
 // report event.key as "Unidentified" while a mobile IME (e.g. Android's
 // Gboard) is composing, which reads as a bug in the log rather than the
-// platform quirk it actually is. Still toggleable from the event log's
-// settings popover for anyone who wants the raw stream.
-//
-// countStart/sortStart stay on (matching countEnd/sortEnd): logEvent skips
-// recording a type entirely when it's disabled, and JourneyBar's
-// computeMatchSortMs pairs each Start with its End — disabling only the
-// Start half would silently zero out the Match/sort time stat.
+// platform quirk it actually is.
 const DEFAULT_EVENT_TYPE_FILTER: LoggedEventTypeFilter = {
   focus: true,
   blur: true,
@@ -53,16 +54,12 @@ function App() {
 
   const [enabledEventTypes, setEnabledEventTypes] =
     useState<LoggedEventTypeFilter>(DEFAULT_EVENT_TYPE_FILTER);
-  // logEvent is called from effects deep in useSuggestions, which re-run
-  // whenever its identity changes — a ref keeps it stable across toggles
-  // instead of tying its identity to enabledEventTypes.
-  const enabledEventTypesRef = useRef(enabledEventTypes);
-  useEffect(() => {
-    enabledEventTypesRef.current = enabledEventTypes;
-  }, [enabledEventTypes]);
 
   const logEvent = useCallback((type: LoggedEventType, detail?: string) => {
-    if (!enabledEventTypesRef.current[type]) return;
+    // Always records, regardless of enabledEventTypes — that filter only
+    // controls what the visible log renders (see EventLog). JourneyBar's
+    // stats need the full history to pair up Start/End events correctly.
+    //
     // Captured here, not inside the updater below — React can defer that
     // updater until after several logEvent calls have already queued,
     // which would stamp back-to-back phase boundaries (e.g. countStart

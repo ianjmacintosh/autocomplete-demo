@@ -5,6 +5,7 @@ import { StealItPanel } from "./StealIt/StealItPanel";
 import { EventLog } from "./EventLog/EventLog";
 import { useUrlSyncedSettings } from "../hooks/useUrlSyncedSettings";
 import { useSuggestions } from "../hooks/useSuggestions";
+import { useLongTasks } from "../hooks/useLongTasks";
 import type {
   Journey,
   LoggedEvent,
@@ -50,15 +51,29 @@ function App() {
     enabledEventTypesRef.current = enabledEventTypes;
   }, [enabledEventTypes]);
 
-  const logEvent = useCallback((type: LoggedEventType, detail?: string) => {
-    if (!enabledEventTypesRef.current[type]) return;
-    setEvents((prev) =>
-      [
-        { id: nextEventId.current++, type, detail, timestamp: Date.now() },
-        ...prev,
-      ].slice(0, MAX_LOGGED_EVENTS),
-    );
-  }, []);
+  const logEvent = useCallback(
+    (type: LoggedEventType, detail?: string) => {
+      if (!enabledEventTypesRef.current[type]) return;
+      // Captured here, not inside the updater below — React can defer that
+      // updater until after several logEvent calls have already queued,
+      // which would stamp back-to-back phase boundaries (e.g. countStart
+      // right before an expensive synchronous loop, countEnd right after)
+      // with the same instant instead of the real gap between them.
+      const timestamp = Date.now();
+      setEvents((prev) =>
+        [
+          {
+            id: nextEventId.current++,
+            type,
+            detail,
+            timestamp,
+          },
+          ...prev,
+        ].slice(0, MAX_LOGGED_EVENTS),
+      );
+    },
+    [],
+  );
 
   const toggleEventType = useCallback((type: LoggedEventType) => {
     setEnabledEventTypes((prev) => ({ ...prev, [type]: !prev[type] }));
@@ -76,9 +91,9 @@ function App() {
   const clearEvents = useCallback(() => setEvents([]), []);
 
   // A "journey" spans from the first character typed into an empty input to
-  // the moment the visitor either picks a suggestion or blurs the field —
-  // rendered as a segmented bar under the Event log. `end` stays null while
-  // the journey is still in progress.
+  // the moment the visitor blurs the field — rendered as CPU/blocked stats
+  // under the Event log. `end` stays null while the journey is still in
+  // progress.
   const [journey, setJourney] = useState<Journey | null>(null);
   const prevQueryRef = useRef("");
 
@@ -89,6 +104,8 @@ function App() {
   }, []);
 
   const clearJourney = useCallback(() => setJourney(null), []);
+
+  const longTasks = useLongTasks();
 
   const { suggestions } = useSuggestions(query, settings, logEvent);
 
@@ -149,10 +166,7 @@ function App() {
           }}
           onInputKeyDown={(key) => logEvent("keydown", key)}
           onInputKeyUp={(key) => logEvent("keyup", key)}
-          onOptionSelect={(selected) => {
-            logEvent("select", selected);
-            completeJourney();
-          }}
+          onOptionSelect={(selected) => logEvent("select", selected)}
         />
         <SettingsPanel settings={settings} onChange={updateSettings} />
 
@@ -194,6 +208,7 @@ function App() {
       <EventLog
         events={events}
         journey={journey}
+        longTasks={longTasks}
         enabledEventTypes={enabledEventTypes}
         onToggleEventType={toggleEventType}
         onSetAllEventTypes={setAllEventTypes}

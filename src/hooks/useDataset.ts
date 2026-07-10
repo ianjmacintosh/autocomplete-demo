@@ -7,14 +7,26 @@ export interface UseDatasetResult {
   isLoading: boolean;
 }
 
-/** Loads the current Size Tier's dataset on the main thread. */
-export function useDataset(tierId: SizeTierId): UseDatasetResult {
+const EMPTY_DATASET: string[] = [];
+
+/**
+ * Loads the current Size Tier's dataset on the main thread — pass
+ * `enabled: false` when nothing on the main thread actually needs it (e.g.
+ * a pure Fuzzy Match search with Worker Mode on, where the worker loads its
+ * own copy), so a 100,000-entry JSON parse doesn't block the main thread
+ * for no reason.
+ */
+export function useDataset(
+  tierId: SizeTierId,
+  enabled = true,
+): UseDatasetResult {
   const [loaded, setLoaded] = useState<{
     tierId: SizeTierId;
     dataset: string[];
   } | null>(null);
 
   useEffect(() => {
+    if (!enabled) return;
     let cancelled = false;
     void getSizeTier(tierId)
       .load()
@@ -24,8 +36,11 @@ export function useDataset(tierId: SizeTierId): UseDatasetResult {
     return () => {
       cancelled = true;
     };
-  }, [tierId]);
+  }, [tierId, enabled]);
 
   const isReady = loaded !== null && loaded.tierId === tierId;
-  return { dataset: isReady ? loaded.dataset : [], isLoading: !isReady };
+  return {
+    dataset: isReady ? loaded.dataset : EMPTY_DATASET,
+    isLoading: enabled && !isReady,
+  };
 }

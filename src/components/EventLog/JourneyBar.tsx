@@ -1,66 +1,68 @@
 import { TimerReset } from "lucide-react";
-import type { Journey, LoggedEvent, LoggedEventType } from "../../lib/types";
+import type { Journey, LoggedEvent } from "../../lib/types";
+import type { RecordedLongTask } from "../../hooks/useLongTasks";
 import "./JourneyBar.css";
 
 interface JourneyBarProps {
   events: LoggedEvent[];
   journey: Journey | null;
+  longTasks: RecordedLongTask[];
   onReset: () => void;
 }
 
-/** Segment 0 always spans from the first keystroke to the next logged
- * event (if any), so it gets a pseudo-type of its own rather than
- * borrowing one of the real LoggedEventTypes. */
-type PhaseType = LoggedEventType | "typing";
-
-const PHASE_LABEL: Record<PhaseType, string> = {
-  typing: "typing",
-  focus: "focus",
-  blur: "blur",
-  keydown: "key down",
-  keyup: "key up",
-  change: "typing",
-  select: "select",
-  debounceStart: "debounce",
-  debounceEnd: "debounce settled",
-  countStart: "counting",
-  countEnd: "counted",
-  sortStart: "sorting",
-  sortEnd: "sorted",
-};
-
-interface Segment {
-  type: PhaseType;
-  durationMs: number;
-}
-
-// Each segment is the gap between two consecutive timestamps — the journey's
-// start, every in-range logged event, and the journey's end — labeled by
-// whichever event opened that gap (or "typing" for the first one, opened by
-// the keystroke that started the journey rather than a logged event).
-function buildSegments(
-  events: LoggedEvent[],
-  start: number,
-  end: number,
-): Segment[] {
+// Pairs up countStart/countEnd and sortStart/sortEnd within the journey's
+// range to total up algorithmic compute time, on whichever thread ran it.
+function computeCpuMs(events: LoggedEvent[], start: number, end: number): number {
   const inRange = events
     .filter((event) => event.timestamp >= start && event.timestamp <= end)
     .slice()
-    .reverse(); // events arrive newest-first; segments need chronological order
+    .reverse(); // events arrive newest-first; pairing needs chronological order
 
-  const boundaries = [start, ...inRange.map((event) => event.timestamp), end];
-  const types: PhaseType[] = ["typing", ...inRange.map((event) => event.type)];
+  let cpuMs = 0;
+  let openCountAt: number | null = null;
+  let openSortAt: number | null = null;
 
-  const segments: Segment[] = [];
-  for (let i = 0; i < boundaries.length - 1; i++) {
-    const durationMs = boundaries[i + 1] - boundaries[i];
-    if (durationMs <= 0) continue;
-    segments.push({ type: types[i], durationMs });
+  for (const event of inRange) {
+    if (event.type === "countStart") {
+      openCountAt = event.timestamp;
+    } else if (event.type === "countEnd" && openCountAt !== null) {
+      cpuMs += event.timestamp - openCountAt;
+      openCountAt = null;
+    } else if (event.type === "sortStart") {
+      openSortAt = event.timestamp;
+    } else if (event.type === "sortEnd" && openSortAt !== null) {
+      cpuMs += event.timestamp - openSortAt;
+      openSortAt = null;
+    }
   }
-  return segments;
+
+  return cpuMs;
 }
 
-export function JourneyBar({ events, journey, onReset }: JourneyBarProps) {
+// Sums how much of the journey overlapped a real main-thread freeze (a Long
+// Task, >~50ms) rather than guessing from which code path ran a
+// computation — a worker's result still has to be deserialized and
+// re-rendered on the main thread, so this is what the user actually felt.
+function computeBlockedMs(
+  longTasks: RecordedLongTask[],
+  start: number,
+  end: number,
+): number {
+  let blockedMs = 0;
+  for (const task of longTasks) {
+    const overlapStart = Math.max(task.start, start);
+    const overlapEnd = Math.min(task.end, end);
+    if (overlapEnd > overlapStart) blockedMs += overlapEnd - overlapStart;
+  }
+  return blockedMs;
+}
+
+export function JourneyBar({
+  events,
+  journey,
+  longTasks,
+  onReset,
+}: JourneyBarProps) {
   if (!journey || journey.end === null) {
     return (
       <div className="journey-bar">
@@ -76,7 +78,8 @@ export function JourneyBar({ events, journey, onReset }: JourneyBarProps) {
 
   const { start, end } = journey;
   const totalMs = end - start;
-  const segments = buildSegments(events, start, end);
+  const cpuMs = Math.round(computeCpuMs(events, start, end));
+  const blockedMs = Math.round(computeBlockedMs(longTasks, start, end));
 
   return (
     <div className="journey-bar">
@@ -95,24 +98,23 @@ export function JourneyBar({ events, journey, onReset }: JourneyBarProps) {
           </button>
         </span>
       </div>
-      <div
-        className="journey-bar-track"
-        role="img"
-        aria-label={`User journey from first keystroke to selection or blur, lasting ${totalMs} milliseconds`}
+      <dl
+        className="journey-bar-stats"
+        aria-label={`User journey from first keystroke to blur, lasting ${totalMs} milliseconds`}
       >
-        {totalMs <= 0 || segments.length === 0 ? (
-          <div className="journey-bar-segment journey-bar-segment--typing" />
-        ) : (
-          segments.map((segment, index) => (
-            <div
-              key={index}
-              className={`journey-bar-segment journey-bar-segment--${segment.type}`}
-              style={{ width: `${(segment.durationMs / totalMs) * 100}%` }}
-              title={`${PHASE_LABEL[segment.type]}: ${segment.durationMs}ms`}
-            />
-          ))
-        )}
-      </div>
+        <div className="journey-bar-stat">
+          <dt className="journey-bar-stat-label">CPU processing</dt>
+          <dd className="journey-bar-stat-value journey-bar-stat-value--cpu">
+            {cpuMs}ms
+          </dd>
+        </div>
+        <div className="journey-bar-stat">
+          <dt className="journey-bar-stat-label">User blocked</dt>
+          <dd className="journey-bar-stat-value journey-bar-stat-value--blocked">
+            {blockedMs}ms
+          </dd>
+        </div>
+      </dl>
     </div>
   );
 }

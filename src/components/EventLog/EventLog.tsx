@@ -11,6 +11,7 @@ import type {
   LoggedEventType,
   LoggedEventTypeFilter,
 } from "../../lib/types";
+import type { RecordedLongTask } from "../../hooks/useLongTasks";
 import { JourneyBar } from "./JourneyBar";
 import "./EventLog.css";
 
@@ -19,6 +20,7 @@ export type { LoggedEvent, LoggedEventType };
 interface EventLogProps {
   events: LoggedEvent[];
   journey: Journey | null;
+  longTasks: RecordedLongTask[];
   enabledEventTypes: LoggedEventTypeFilter;
   onToggleEventType: (type: LoggedEventType) => void;
   onSetAllEventTypes: (enabled: boolean) => void;
@@ -46,6 +48,7 @@ const EVENT_TYPES = Object.keys(EVENT_LABEL) as LoggedEventType[];
 export function EventLog({
   events,
   journey,
+  longTasks,
   enabledEventTypes,
   onToggleEventType,
   onSetAllEventTypes,
@@ -136,7 +139,12 @@ export function EventLog({
           ))}
         </ol>
       )}
-      <JourneyBar events={events} journey={journey} onReset={onClearJourney} />
+      <JourneyBar
+        events={events}
+        journey={journey}
+        longTasks={longTasks}
+        onReset={onClearJourney}
+      />
     </aside>
   );
 }

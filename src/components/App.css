@@ -5,6 +5,10 @@
   align-items: start;
   min-height: 100vh;
   text-align: left;
+  font-size: 24px;
+  font-family:
+    "Iowan Old Style", "Palatino Linotype", "URW Palladio L", P052, serif;
+  font-weight: normal;
 }
 
 .app-main {
@@ -20,7 +24,7 @@
 
 .app-header h1 {
   font-size: 2rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 2rem;
 }
 
 .app-header p {
@@ -32,9 +36,7 @@
   margin-top: 2.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--border-color, #ddd);
-  font-size: 0.9rem;
-  /* 65% failed WCAG AA (4.29:1) against a white background in light mode. */
-  color: color-mix(in srgb, currentColor 75%, transparent);
+  font-size: 1rem;
 }
 
 .app-footer a {
@@ -51,15 +53,13 @@
   margin: 0.25rem 0;
 }
 
+.app-footer .branding {
+  margin-top: 2rem;
+}
+
 @media (prefers-color-scheme: dark) {
   .app-footer {
     border-top-color: #444;
-  }
-}
-
-@media (max-width: 700px) {
-  .app-footer {
-    font-size: 0.95rem;
   }
 }
 

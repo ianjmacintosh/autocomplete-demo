@@ -24,12 +24,12 @@ export function StealItPanel({ settings }: StealItPanelProps) {
     <section className="steal-it-panel">
       <h2>Steal it</h2>
       <p>
-        The real implementation lives at{" "}
+        My original implementation lives at{" "}
         <a href={SOURCE_URL} target="_blank" rel="noreferrer">
           github.com/ianjmacintosh/pillbug
         </a>
-        . Or copy this prompt into Claude, Codex, or your AI assistant of choice
-        to add it to your own project, pre-configured exactly like this:
+        , but you could also prompt your AI assistant of choice to add it to
+        your own project, pre-configured using the settings you've applied here:
       </p>
       <textarea readOnly value={prompt} rows={11} className="steal-it-prompt" />
       <button

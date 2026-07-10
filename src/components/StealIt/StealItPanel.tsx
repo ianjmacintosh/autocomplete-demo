@@ -26,10 +26,11 @@ export function StealItPanel({ settings }: StealItPanelProps) {
       <p>
         My original implementation lives at{" "}
         <a href={SOURCE_URL} target="_blank" rel="noreferrer">
-          github.com/ianjmacintosh/pillbug
+          github.com/ianjmacintosh/pillbug/tree/main/src/components/PrescriptionForm
         </a>
-        , but you could also prompt your AI assistant of choice to add it to
-        your own project, pre-configured using the settings you've applied here:
+        , so you can review the code there. You could also tell your AI
+        assistant of choice to add it to your own project using a prompt like
+        this:
       </p>
       <textarea readOnly value={prompt} rows={11} className="steal-it-prompt" />
       <button

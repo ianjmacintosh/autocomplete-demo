@@ -134,24 +134,14 @@ function App() {
       <div className="app-main">
         <header className="app-header">
           <h1>Autocomplete</h1>
-          <p>
-            I spent a couple of days building and refining an autocomplete input
-            with Sonnet 5.0. It was fun, but I don't want to make this all over
-            again next time I need an autocomplete input, so I made a note to
-            reference this implementation in the future. Then I realized there
-            are probably lots of other people who could use the same thing for
-            their projects.
-          </p>
-          <p>
-            Give it a spin. I hope you find it useful and shamelessly steal it.
-            Make it better, make it faster, make it your own.
-          </p>
-          <p>
-            You can try out different datasets and filtering options, and I've
-            included verbose event logging so you can understand what's
-            happening under the hood.
-          </p>
         </header>
+        <label
+          htmlFor="autocomplete-demo-input"
+          className="autocomplete-input-label"
+        >
+          Start typing. This input searches the{" "}
+          <span className="data-type">{settings.tierId}</span> dataset:
+        </label>
 
         <Autocomplete
           value={query}
@@ -167,6 +157,30 @@ function App() {
           onInputKeyUp={(key) => logEvent("keyup", key)}
           onOptionSelect={(selected) => logEvent("select", selected)}
         />
+
+        <section>
+          <p>
+            I spent a few hours building and refining an autocomplete input.
+            Even with the help of Sonnet 5.0, it was a little tedious getting
+            the details right like picking algorithms and settings, debouncing
+            queries, trying almost-but-not-quite libraries, and off-loading work
+            to a web worker. I don't want to make this all over again next time
+            I need an autocomplete input, so I made a note to reference this
+            implementation in the future. Then I realized there are probably
+            lots of other people who could use the same thing for their
+            projects.
+          </p>
+          <p>
+            Give it a spin. I hope you find it useful and shamelessly steal it.
+            Make it better, make it faster, make it your own.
+          </p>
+          <p>
+            You can try out different datasets and filtering options, and I've
+            included verbose event logging so you can understand what's
+            happening under the hood.
+          </p>
+        </section>
+
         <SettingsPanel settings={settings} onChange={updateSettings} />
 
         <StealItPanel settings={settings} />

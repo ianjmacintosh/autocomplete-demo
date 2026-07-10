@@ -45,6 +45,7 @@ export function Autocomplete({
         <Combobox
           id="autocomplete-demo-input"
           className="autocomplete-input"
+          autoFocus
           onFocus={onInputFocus}
           onBlur={onInputBlur}
           onKeyDown={(event) => onInputKeyDown?.(event.key)}

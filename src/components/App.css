@@ -14,6 +14,7 @@
 .app-main {
   grid-column: 1;
   max-width: 720px;
+  min-width: 0;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
 }
@@ -30,6 +31,15 @@
 .app-header p {
   opacity: 0.8;
   margin-top: 0;
+}
+
+.data-type {
+  font-family:
+    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  background-color: #eee;
+  color: #333;
+  font-size: 1.25rem;
+  padding: 0.25rem;
 }
 
 .app-footer {

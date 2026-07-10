@@ -46,7 +46,15 @@ export function useSuggestions(
     debounceMs,
   } = settings;
 
-  const { dataset, isLoading: datasetLoading } = useDataset(tierId);
+  // The main thread only needs the full dataset for the Prefix Match
+  // (strategy "prefix"/"combined") and for running Fuzzy Match itself when
+  // Worker Mode is off. A pure "fuzzy" search with Worker Mode on never
+  // touches it here — the worker loads its own copy — so skip the parse.
+  const needsMainThreadDataset = strategy !== "fuzzy" || !workerModeOn;
+  const { dataset, isLoading: datasetLoading } = useDataset(
+    tierId,
+    needsMainThreadDataset,
+  );
   const { value: debouncedQuery, isPending: debouncePending } =
     useDebouncedValue(
       query,

@@ -1,66 +1,105 @@
+import { Tooltip, TooltipAnchor, TooltipProvider } from "@ariakit/react";
 import { TimerReset } from "lucide-react";
-import type { Journey, LoggedEvent, LoggedEventType } from "../../lib/types";
+import type { Journey, LoggedEvent } from "../../lib/types";
+import type { RecordedLongTask } from "../../hooks/useLongTasks";
 import "./JourneyBar.css";
 
 interface JourneyBarProps {
   events: LoggedEvent[];
   journey: Journey | null;
+  longTasks: RecordedLongTask[];
   onReset: () => void;
 }
 
-/** Segment 0 always spans from the first keystroke to the next logged
- * event (if any), so it gets a pseudo-type of its own rather than
- * borrowing one of the real LoggedEventTypes. */
-type PhaseType = LoggedEventType | "typing";
-
-const PHASE_LABEL: Record<PhaseType, string> = {
-  typing: "typing",
-  focus: "focus",
-  blur: "blur",
-  keydown: "key down",
-  keyup: "key up",
-  change: "typing",
-  select: "select",
-  debounceStart: "debounce",
-  debounceEnd: "debounce settled",
-  countStart: "counting",
-  countEnd: "counted",
-  sortStart: "sorting",
-  sortEnd: "sorted",
-};
-
-interface Segment {
-  type: PhaseType;
-  durationMs: number;
-}
-
-// Each segment is the gap between two consecutive timestamps — the journey's
-// start, every in-range logged event, and the journey's end — labeled by
-// whichever event opened that gap (or "typing" for the first one, opened by
-// the keystroke that started the journey rather than a logged event).
-function buildSegments(
+// Pairs up countStart/countEnd and sortStart/sortEnd within the journey's
+// range to total up the search's own compute time, on whichever thread ran
+// it. This is deliberately narrow — just the count/sort steps themselves,
+// not all main-thread work — so it isn't a superset of computeBlockedMs
+// below; most of a journey's blocking usually comes from elsewhere
+// (rendering each keystroke, event handling, GC), not from matching itself.
+function computeMatchSortMs(
   events: LoggedEvent[],
   start: number,
   end: number,
-): Segment[] {
+): number {
   const inRange = events
     .filter((event) => event.timestamp >= start && event.timestamp <= end)
     .slice()
-    .reverse(); // events arrive newest-first; segments need chronological order
+    .reverse(); // events arrive newest-first; pairing needs chronological order
 
-  const boundaries = [start, ...inRange.map((event) => event.timestamp), end];
-  const types: PhaseType[] = ["typing", ...inRange.map((event) => event.type)];
+  let matchSortMs = 0;
+  let openCountAt: number | null = null;
+  let openSortAt: number | null = null;
 
-  const segments: Segment[] = [];
-  for (let i = 0; i < boundaries.length - 1; i++) {
-    const durationMs = boundaries[i + 1] - boundaries[i];
-    if (durationMs <= 0) continue;
-    segments.push({ type: types[i], durationMs });
+  for (const event of inRange) {
+    if (event.type === "countStart") {
+      openCountAt = event.timestamp;
+    } else if (event.type === "countEnd" && openCountAt !== null) {
+      matchSortMs += event.timestamp - openCountAt;
+      openCountAt = null;
+    } else if (event.type === "sortStart") {
+      openSortAt = event.timestamp;
+    } else if (event.type === "sortEnd" && openSortAt !== null) {
+      matchSortMs += event.timestamp - openSortAt;
+      openSortAt = null;
+    }
   }
-  return segments;
+
+  return matchSortMs;
 }
 
-export function JourneyBar({ events, journey, onReset }: JourneyBarProps) {
+// Sums how much of the journey overlapped a real main-thread freeze (a Long
+// Task, >~50ms) rather than guessing from which code path ran a
+// computation — a worker's result still has to be deserialized and
+// re-rendered on the main thread, so this is what the user actually felt.
+function computeBlockedMs(
+  longTasks: RecordedLongTask[],
+  start: number,
+  end: number,
+): number {
+  let blockedMs = 0;
+  for (const task of longTasks) {
+    const overlapStart = Math.max(task.start, start);
+    const overlapEnd = Math.min(task.end, end);
+    if (overlapEnd > overlapStart) blockedMs += overlapEnd - overlapStart;
+  }
+  return blockedMs;
+}
+
+interface StatProps {
+  label: string;
+  value: string;
+  valueClassName: string;
+  description: string;
+}
+
+// TooltipAnchor renders a plain, non-interactive div by default, so it needs
+// its own accessible name (the tooltip itself is "strictly for visual
+// purposes" per Ariakit's docs — it isn't wired up as a description) and a
+// tabIndex to be reachable by keyboard, matching how the mouse-hover case
+// discovers it.
+function Stat({ label, value, valueClassName, description }: StatProps) {
+  return (
+    <TooltipProvider>
+      <TooltipAnchor
+        className="journey-bar-stat"
+        tabIndex={0}
+        aria-label={`${label}: ${value}`}
+      >
+        <dt className="journey-bar-stat-label">{label}</dt>
+        <dd className={`journey-bar-stat-value ${valueClassName}`}>{value}</dd>
+      </TooltipAnchor>
+      <Tooltip className="journey-bar-tooltip">{description}</Tooltip>
+    </TooltipProvider>
+  );
+}
+
+export function JourneyBar({
+  events,
+  journey,
+  longTasks,
+  onReset,
+}: JourneyBarProps) {
   if (!journey || journey.end === null) {
     return (
       <div className="journey-bar">
@@ -76,7 +115,8 @@ export function JourneyBar({ events, journey, onReset }: JourneyBarProps) {
 
   const { start, end } = journey;
   const totalMs = end - start;
-  const segments = buildSegments(events, start, end);
+  const matchSortMs = Math.round(computeMatchSortMs(events, start, end));
+  const blockedMs = Math.round(computeBlockedMs(longTasks, start, end));
 
   return (
     <div className="journey-bar">
@@ -95,24 +135,23 @@ export function JourneyBar({ events, journey, onReset }: JourneyBarProps) {
           </button>
         </span>
       </div>
-      <div
-        className="journey-bar-track"
-        role="img"
-        aria-label={`User journey from first keystroke to selection or blur, lasting ${totalMs} milliseconds`}
+      <dl
+        className="journey-bar-stats"
+        aria-label={`User journey from first keystroke to blur, lasting ${totalMs} milliseconds`}
       >
-        {totalMs <= 0 || segments.length === 0 ? (
-          <div className="journey-bar-segment journey-bar-segment--typing" />
-        ) : (
-          segments.map((segment, index) => (
-            <div
-              key={index}
-              className={`journey-bar-segment journey-bar-segment--${segment.type}`}
-              style={{ width: `${(segment.durationMs / totalMs) * 100}%` }}
-              title={`${PHASE_LABEL[segment.type]}: ${segment.durationMs}ms`}
-            />
-          ))
-        )}
-      </div>
+        <Stat
+          label="Match/sort time"
+          value={`${matchSortMs}ms`}
+          valueClassName="journey-bar-stat-value--compute"
+          description="Time spent inside the search's own count/sort steps, on whichever thread ran them. Narrow by design — not total CPU work, so it isn't guaranteed to bound Main thread blocked."
+        />
+        <Stat
+          label="Main thread blocked"
+          value={`${blockedMs}ms`}
+          valueClassName="journey-bar-stat-value--blocked"
+          description="Total time the main thread was frozen (any task over ~50ms) during this journey — rendering each keystroke, event handling, and GC included, not just matching."
+        />
+      </dl>
     </div>
   );
 }

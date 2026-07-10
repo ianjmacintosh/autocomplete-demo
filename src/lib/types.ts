@@ -67,8 +67,8 @@ export type LoggedEventTypeFilter = Record<LoggedEventType, boolean>;
 
 /**
  * One "journey": the span from the first character typed into an empty
- * input to the moment the user either picks a suggestion or blurs the
- * field. `end` is null while the journey is still in progress.
+ * input to the moment the user blurs the field. `end` is null while the
+ * journey is still in progress.
  */
 export interface Journey {
   start: number;

@@ -16,11 +16,16 @@ import "./App.css";
 
 const MAX_LOGGED_EVENTS = 200;
 
-// keydown/keyup/select/countStart/sortStart are off by default: keydown and
-// keyup in particular report event.key as "Unidentified" while a mobile IME
-// (e.g. Android's Gboard) is composing, which reads as a bug in the log
-// rather than the platform quirk it actually is. Still toggleable from the
-// event log's settings popover for anyone who wants the raw stream.
+// keydown/keyup/select are off by default: keydown and keyup in particular
+// report event.key as "Unidentified" while a mobile IME (e.g. Android's
+// Gboard) is composing, which reads as a bug in the log rather than the
+// platform quirk it actually is. Still toggleable from the event log's
+// settings popover for anyone who wants the raw stream.
+//
+// countStart/sortStart stay on (matching countEnd/sortEnd): logEvent skips
+// recording a type entirely when it's disabled, and JourneyBar's
+// computeMatchSortMs pairs each Start with its End — disabling only the
+// Start half would silently zero out the Match/sort time stat.
 const DEFAULT_EVENT_TYPE_FILTER: LoggedEventTypeFilter = {
   focus: true,
   blur: true,
@@ -30,9 +35,9 @@ const DEFAULT_EVENT_TYPE_FILTER: LoggedEventTypeFilter = {
   select: false,
   debounceStart: true,
   debounceEnd: true,
-  countStart: false,
+  countStart: true,
   countEnd: true,
-  sortStart: false,
+  sortStart: true,
   sortEnd: true,
 };
 

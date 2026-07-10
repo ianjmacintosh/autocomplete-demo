@@ -77,6 +77,30 @@
   padding: 0.35rem 0.5rem;
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.06);
+  cursor: default;
+}
+
+.journey-bar-stat:focus {
+  outline: none;
+}
+
+.journey-bar-stat:focus-visible {
+  outline: 2px solid #66d9ef;
+  outline-offset: 1px;
+}
+
+.journey-bar-tooltip {
+  max-width: 260px;
+  background: #272822;
+  color: #f8f8f2;
+  border: 1px solid #49483e;
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-family:
+    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 .journey-bar-stat-label {

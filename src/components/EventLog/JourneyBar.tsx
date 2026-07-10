@@ -1,3 +1,4 @@
+import { Tooltip, TooltipAnchor, TooltipProvider } from "@ariakit/react";
 import { TimerReset } from "lucide-react";
 import type { Journey, LoggedEvent } from "../../lib/types";
 import type { RecordedLongTask } from "../../hooks/useLongTasks";
@@ -65,6 +66,36 @@ function computeBlockedMs(
   return blockedMs;
 }
 
+interface StatProps {
+  label: string;
+  value: string;
+  valueClassName: string;
+  description: string;
+}
+
+// TooltipAnchor renders a plain, non-interactive div by default, so it needs
+// its own accessible name (the tooltip itself is "strictly for visual
+// purposes" per Ariakit's docs — it isn't wired up as a description) and a
+// tabIndex to be reachable by keyboard, matching how the mouse-hover case
+// discovers it.
+function Stat({ label, value, valueClassName, description }: StatProps) {
+  return (
+    <TooltipProvider>
+      <TooltipAnchor
+        className="journey-bar-stat"
+        tabIndex={0}
+        aria-label={`${label}: ${value}`}
+      >
+        <dt className="journey-bar-stat-label">{label}</dt>
+        <dd className={`journey-bar-stat-value ${valueClassName}`}>
+          {value}
+        </dd>
+      </TooltipAnchor>
+      <Tooltip className="journey-bar-tooltip">{description}</Tooltip>
+    </TooltipProvider>
+  );
+}
+
 export function JourneyBar({
   events,
   journey,
@@ -110,24 +141,18 @@ export function JourneyBar({
         className="journey-bar-stats"
         aria-label={`User journey from first keystroke to blur, lasting ${totalMs} milliseconds`}
       >
-        <div
-          className="journey-bar-stat"
-          title="Time spent inside the search's own count/sort steps, on whichever thread ran them. Narrow by design — not total CPU work, so it isn't guaranteed to bound Main thread blocked."
-        >
-          <dt className="journey-bar-stat-label">Match/sort time</dt>
-          <dd className="journey-bar-stat-value journey-bar-stat-value--compute">
-            {matchSortMs}ms
-          </dd>
-        </div>
-        <div
-          className="journey-bar-stat"
-          title="Total time the main thread was frozen (any task over ~50ms) during this journey — rendering each keystroke, event handling, and GC included, not just matching."
-        >
-          <dt className="journey-bar-stat-label">Main thread blocked</dt>
-          <dd className="journey-bar-stat-value journey-bar-stat-value--blocked">
-            {blockedMs}ms
-          </dd>
-        </div>
+        <Stat
+          label="Match/sort time"
+          value={`${matchSortMs}ms`}
+          valueClassName="journey-bar-stat-value--compute"
+          description="Time spent inside the search's own count/sort steps, on whichever thread ran them. Narrow by design — not total CPU work, so it isn't guaranteed to bound Main thread blocked."
+        />
+        <Stat
+          label="Main thread blocked"
+          value={`${blockedMs}ms`}
+          valueClassName="journey-bar-stat-value--blocked"
+          description="Total time the main thread was frozen (any task over ~50ms) during this journey — rendering each keystroke, event handling, and GC included, not just matching."
+        />
       </dl>
     </div>
   );
